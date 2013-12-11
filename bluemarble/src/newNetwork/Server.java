@@ -75,7 +75,9 @@ public class Server extends Thread{
 		String[] clist = new String[s.size()]; 
 		s.toArray(clist);
 		for(int i=0;i<clist.length;i++) {
-			clientMap.get(clist[i]).send(cd);
+			synchronized(clientMap) {
+				clientMap.get(clist[i]).send(cd);
+			}
 		}
 		try {
 			if (cd.type == ChatType.Image) showImage(cd);

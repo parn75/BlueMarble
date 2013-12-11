@@ -130,8 +130,7 @@ public class ClientUI extends JFrame{
 	}
 
 	
-	public static void main(String[] args) {
-		@SuppressWarnings("unused")
+	public static void main(String[] args) {		
 		ClientUI cUI = new ClientUI("Client");
 	}
 }

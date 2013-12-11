@@ -16,6 +16,7 @@ import javax.swing.text.BadLocationException;
 public class ClientAction implements ActionListener{
 	ClientUI clientUI;
 	Client client;
+	String ID;
 	
 	public ClientAction(ClientUI clientUI) {
 		this.clientUI = clientUI;
@@ -37,7 +38,9 @@ public class ClientAction implements ActionListener{
 	public void btnConnectAction() {
 		client = new Client(clientUI, clientUI.hostname.getText());
 		client.start(); //클라이언트 스레드 시작
-		ChatData cd = new ChatData(ChatType.ID, clientUI.fldID.getText());
+		ID = clientUI.fldID.getText();
+		System.out.println(ID);
+		ChatData cd = new ChatData(ChatType.ID, ID);
 		client.send(cd);
 		clientUI.hostname.setEditable(false);
 		clientUI.fldID.setEnabled(false);

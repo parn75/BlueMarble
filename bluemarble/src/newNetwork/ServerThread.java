@@ -130,13 +130,12 @@ class ServerThread extends Thread{
 				case Join: 
 						if (serverUI.roomList.joinRoom((int)cd.data, this.getName()) == true) {
 							String[] to = {this.getName()};
-							ChatData rd = new ChatData(ChatType.Join, to, "Success");
-							System.out.println(this.getName());							
+							ChatData rd = new ChatData(ChatType.Join, to, "Success");										
 							server.send(rd);
 						}else {
 							String[] to = {this.getName()};
 							ChatData rd = new ChatData(ChatType.Join, to, "πÊ¿Ã ∞°µÊ√°Ω¿¥œ¥Ÿ.");
-							server.send(rd);	
+							server.send(rd);
 						}					
 					break;
 				default:

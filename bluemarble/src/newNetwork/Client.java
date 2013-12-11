@@ -19,6 +19,10 @@ class Client extends Thread {
 	Socket socket ; //서버와 통신
 	ClientUI clientUI;
 	String hostname;
+	WaitingRoom waitingRoom;
+	boolean inWaitingRoom = false;
+	boolean startWaitingRoom = false;
+	boolean inGame = false;
 
 	ObjectOutputStream oos;
 	ObjectInputStream ois;
@@ -97,9 +101,9 @@ class Client extends Thread {
 			Object obj=null;
 			
 			while((obj=ois.readObject())!=null) {	
+				
 				if(obj instanceof ChatData) {
-					ChatData cd = (ChatData)obj;
-					
+					ChatData cd = (ChatData)obj;					
 					try {
 						switch(cd.type) {							
 							case ConnectorList:	updateConnectorList(cd);
@@ -118,11 +122,13 @@ class Client extends Thread {
 									String msg = (String)cd.data;
 									if(msg.equals("Success")) {
 										System.out.println("방 접속 성공"); //방 접속 작업
+										inWaitingRoom = true;										
 									}else JOptionPane.showMessageDialog(clientUI, msg);
 								break;
-							case RoomStatus: updateRoomStatus(cd);
+							case RoomStatus: updateRoomStatus(cd); 
 								break;
-							
+							case WaitingRoomStatus: if(inWaitingRoom == true) updateWaitingRoomStatus(cd);
+								break;
 							case GameData: break;
 							default:
 								break;					
@@ -139,11 +145,36 @@ class Client extends Thread {
 		}
 	}
 
-	private void updateRoomStatus(ChatData cd) {	
+	synchronized private void updateWaitingRoomStatus(ChatData cd) {
+		System.out.println("대기실 작동");
+		WaitingRoomStatus[] wrsAry = (WaitingRoomStatus[])cd.data;
+		WaitingRoomStatus wrs = null;
+		
+		ForPlayers: 
+		for(int i=0;i<12;i++) {		
+			for(String s: wrsAry[i].playerNames) {			
+				if (s!=null && s.equals(clientUI.clientAction.ID)) {
+					wrs = wrsAry[i];
+					break ForPlayers;
+				}
+			}			
+		}		
+		
+		if(startWaitingRoom == false && wrs!=null) {
+			waitingRoom = new WaitingRoom(wrs, this);
+			waitingRoom.setVisible(true);
+			startWaitingRoom = true;
+			clientUI.setVisible(false);
+		}
+	}
+
+	synchronized private void updateRoomStatus(ChatData cd) {	
 		RoomStatus rs = (RoomStatus)(cd.data);
 		for(int i=0;i<12;i++) {
 			clientUI.roomList.roomList[i].setTitle(rs.roomTitle[i]);
-			clientUI.roomList.roomList[i].setPlayerNum(rs.playerNum[i]);			
+			clientUI.roomList.roomList[i].setPlayerNum(rs.playerNum[i]);
+			if(rs.playerNum[i]>0) clientUI.roomList.roomList[i].joinB.setText("참가하기");
+			else if (rs.playerNum[i]==4) clientUI.roomList.roomList[i].joinB.setEnabled(false);
 			clientUI.roomList.roomList[i].setStarted(rs.isStarted[i]);
 		}
 	}

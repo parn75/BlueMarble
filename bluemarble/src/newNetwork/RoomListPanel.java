@@ -15,7 +15,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
@@ -112,15 +111,21 @@ class RoomPanel extends JPanel implements MouseListener{ //ClientAction에 MouseL
 	boolean isStarted = false;
 	RoomListPanel roomListPanel;
 	
-	public boolean joinRoom(String playerName) {
-		if(playerNum<4) {
-			playerNames[playerNum] = playerName;
-			playerNum++;
-			setPlayerNum(playerNum);
+	public String[] getPlayerNames() {
+		return playerNames;
+	}
+	
+	synchronized public boolean joinRoom(String playerName) {
+		playerNum++;
+	
+		if(playerNum<=4) {
+			playerNames[playerNum-1] = playerName;
+			System.out.println(playerNames[playerNum-1]);	
 			if(playerNum == 1) joinB.setText("참가하기");
-			if(playerNum == 4) joinB.setEnabled(false);
 			return true;
 		}
+		if(playerNum == 4) joinB.setEnabled(false);
+		if(playerNum>4) playerNum = 4;
 		return false;
 		//서버를 통해 클라이언트에 인원수가 증가되었음을 보낸다.
 	}
@@ -205,7 +210,9 @@ class RoomPanel extends JPanel implements MouseListener{ //ClientAction에 MouseL
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		/*
 		if(e.getSource() == joinB) {
+			
 			if(playerNum<5) playerNum++;
 			if(playerNum==1) {
 				setPlayerNum(playerNum);
@@ -214,7 +221,7 @@ class RoomPanel extends JPanel implements MouseListener{ //ClientAction에 MouseL
 			}
 			else if(playerNum<=4 && isCreated == true) setPlayerNum(playerNum); else JOptionPane.showMessageDialog(this, "방이 가득 찼습니다.");
 		}
-		
+		*/
 		if(e.getSource() == joinB && isClient == true && playerNum<4) {
 			ChatData cd = new ChatData(ChatType.Join, roomNumber);
 			roomListPanel.client.send(cd);

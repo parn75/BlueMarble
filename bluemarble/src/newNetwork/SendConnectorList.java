@@ -23,7 +23,9 @@ class SendConnectorList extends TimerTask {
 		s.toArray(clist);
 		ChatData cd = new ChatData(ChatType.ConnectorList, to);
 		for(int i=0;i<clist.length;i++) {
-			if(server.clientMap.get(clist[i])!= null) server.clientMap.get(clist[i]).send(cd);		
+			synchronized(server.clientMap) {
+				if(server.clientMap.get(clist[i])!= null) server.clientMap.get(clist[i]).send(cd);		
+			}
 		}
 	}
 }
@@ -55,6 +57,44 @@ class SendRoomStatus extends TimerTask {
 class RoomStatus implements Serializable{
 	String[] roomTitle = new String[12];
 	int[] playerNum = new int[12];
-	boolean[] isStarted = new boolean[12];	
+	boolean[] isStarted = new boolean[12];
 }
 
+class SendWaitingRoomStatus extends TimerTask {
+	Server server;
+	ServerUI serverUI;
+	
+	public SendWaitingRoomStatus(Server server, ServerUI serverUI) {
+		this.server = server;
+		this.serverUI = serverUI;
+	}
+	
+	@Override
+	public void run() {
+		
+		WaitingRoomStatus[] ws = new WaitingRoomStatus[12];
+		for(int i=0;i<12;i++) {
+			ws[i] = new WaitingRoomStatus();
+			ws[i].playerNames = serverUI.roomList.roomList[i].getPlayerNames().clone();
+			ws[i].host = ws[i].playerNames[0];
+			ws[i].title = serverUI.roomList.roomList[i].getTitle();
+		}
+		ChatData cd = new ChatData(ChatType.WaitingRoomStatus, ws);
+		
+		String[] to= new String[serverUI.listModel.size()];
+		serverUI.listModel.copyInto(to);
+		Set<String> s = server.clientMap.keySet();
+		String[] clist = new String[s.size()]; 
+		s.toArray(clist);		
+		for(int i=0;i<clist.length;i++) {
+			if(server.clientMap.get(clist[i])!= null) server.clientMap.get(clist[i]).send(cd);		
+		}
+		
+	}
+}
+
+class WaitingRoomStatus implements Serializable {
+	String[] playerNames;
+	String host;
+	String title;	
+}

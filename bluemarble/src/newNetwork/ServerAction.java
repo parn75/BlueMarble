@@ -28,7 +28,11 @@ public class ServerAction extends AbstractAction implements ActionListener{
 		
 		Timer timer2 = new Timer();
 		SendRoomStatus srs = new SendRoomStatus(server, serverUI);
-		timer2.schedule(srs, 2000, 5000);
+		timer2.schedule(srs, 2000, 2000);
+		
+		Timer timer3 = new Timer();
+		SendWaitingRoomStatus swr = new SendWaitingRoomStatus(server, serverUI);
+		timer3.schedule(swr, 3000, 3000);
 		
 	}
 	
