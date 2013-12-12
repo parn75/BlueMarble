@@ -1,4 +1,4 @@
-package newNetwork;
+package network12_12night;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -18,12 +18,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
-public class RoomListPanel extends JPanel {
-	ArrayList<RoomData> rooms = new ArrayList<RoomData>();
-	final int room_Height = 80;
-	int room_HeightStart = 0;	
-	RoomPanel[] roomList = new RoomPanel[12];
-	int listForClient = 0;
+public class RoomListPanel extends JPanel {  //각 대기실을 모아주기위한 바탕 패널
+	RoomPanel[] roomList = new RoomPanel[12];	
 	Server server;
 	Client client;
 	boolean isServer = false;
@@ -33,15 +29,18 @@ public class RoomListPanel extends JPanel {
 	public RoomListPanel() {			
 		this.setLayout(new GridLayout(3,3));
 		for(int i=0;i<12;i++) {
-		roomList[i] = new RoomPanel(this, "빈 방", 0, i);
-		this.add(roomList[i]);
+			roomList[i] = new RoomPanel(this, "빈 방", 0, i);
+			this.add(roomList[i]);
 		}
 	}
 	
 	public void setServer(Server server) {
 		this.server = server;
 		isServer = true;
-		for(int i=0;i<12;i++) roomList[i].setServer(true);
+		for(int i=0;i<12;i++) {
+			roomList[i].setServer(true);
+			roomList[i].setUnJoinable();
+		}
 	}
 	
 	public void setClient(Client client) {
@@ -80,12 +79,16 @@ public class RoomListPanel extends JPanel {
 		 return bi;
 	}
 	
-	public void setRoom(int roomNum, String title) {
+	public void setRoom(int roomNum, String title) { //해당 방 번호의 제목을 변경한다
 		roomList[roomNum].setTitle(title);
 	}
 	
-	public boolean joinRoom(int roomNum, String playerName) {
+	public boolean joinRoom(int roomNum, String playerName) { //해당 방에 플레이어 추가
 		return roomList[roomNum].joinRoom(playerName);
+	}
+	
+	public void deletePlayer(int roomNum, String player) { //해당 방에서 플레이어 제거
+		roomList[roomNum].deletePlayer(player);
 	}
 
 	public static void main(String[] args) {
@@ -98,40 +101,52 @@ public class RoomListPanel extends JPanel {
 
 }
 
-class RoomPanel extends JPanel implements MouseListener{ //ClientAction에 MouseListener move?
-	int roomNumber;
-	JLabel roomName;
-	JLabel players;
+class RoomPanel extends JPanel implements MouseListener{ 
+	int roomNumber; //이 방의 넘버
+	JLabel roomName; //방제
+	JLabel players; //플레이어 숫자를 표시하기 위한 라벨
 	JButton joinB;
-	int playerNum=0;
-	String[] playerNames = new String[4];
+	int playerNum=0; //플레이어 숫자
+	String[] playerNames = new String[4]; //플레이어의 이름을 담기 위한 배열
 	boolean isCreated = false;
-	boolean isClient = false;
-	boolean isServer = false;
-	boolean isStarted = false;
+	boolean isClient = false; //클라이언트에 있는 패널인지?
+	boolean isServer = false; //서버에 있는 패널인지?
+	boolean isStarted = false; 
 	RoomListPanel roomListPanel;
 	
 	public String[] getPlayerNames() {
 		return playerNames;
 	}
 	
-	synchronized public boolean joinRoom(String playerName) {
-		playerNum++;
-	
+	synchronized public boolean joinRoom(String playerName) {	//플레이어가 참가한 경우 ServerThread에서만 호출
 		if(playerNum<=4) {
-			playerNames[playerNum-1] = playerName;
-			System.out.println(playerNames[playerNum-1]);	
+			playerNames[playerNum] = playerName;
+			System.out.println(playerNames[playerNum]);	
 			if(playerNum == 1) joinB.setText("참가하기");
+			if(playerNum <4) playerNum++;
 			setPlayerNum(playerNum);
 			return true;
 		}
 		if(playerNum == 4) joinB.setEnabled(false);
 		if(playerNum>4) playerNum = 4;
 		return false;
-		//서버를 통해 클라이언트에 인원수가 증가되었음을 보낸다.
 	}
 	
-	public BufferedImage onePanel() {
+	synchronized public void deletePlayer(String player) { //플레이어가 나간 경우 ServerThread에서만 호출
+		
+		for(int i=0;i<playerNames.length;i++) {
+			if(playerNames[i].equals(player)) {
+				for(int j=i;j<playerNames.length-1;j++) 
+					if(playerNames[j+1] != null || playerNames[j+1] !="None") playerNames[j] = playerNames[j+1];
+					else playerNames[j] = "None";				
+			}
+		}
+		playerNum--;
+		setPlayerNum(playerNum);
+		if(playerNum==0) joinB.setText("게임 만들기");
+	}
+	
+	public BufferedImage onePanel() { //패널의 바탕을 칠한다. 외부 이미지 로딩으로 변경?
 		BufferedImage bi = new BufferedImage(this.getWidth(), 100, BufferedImage.TYPE_INT_ARGB); 
 		Graphics2D ig2 = bi.createGraphics();
 		 ig2.setPaint(new Color(120,240,120));
@@ -147,6 +162,7 @@ class RoomPanel extends JPanel implements MouseListener{ //ClientAction에 MouseL
 	}
 	
 	public RoomPanel(RoomListPanel roomListPanel, String title, int playerNum, int roomNumber) {
+		for(int i=0;i<playerNames.length;i++) playerNames[i] = "None";
 		this.roomNumber = roomNumber;
 		this.roomListPanel = roomListPanel;
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -178,9 +194,10 @@ class RoomPanel extends JPanel implements MouseListener{ //ClientAction에 MouseL
 	}
 	
 	public void setPlayerNum(int playerNum) {
+		if(playerNum == 0) joinB.setText("게임 만들기");
 		if(playerNum == 1) joinB.setText("참가하기");
 		if(playerNum == 4) joinB.setEnabled(false);
-		if(playerNum>0 && playerNum<=4) {
+		if(playerNum>=0 && playerNum<=4) {
 			players.setText("참가 인원: " + playerNum);
 		}
 	}
@@ -211,18 +228,6 @@ class RoomPanel extends JPanel implements MouseListener{ //ClientAction에 MouseL
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		/*
-		if(e.getSource() == joinB) {
-			
-			if(playerNum<5) playerNum++;
-			if(playerNum==1) {
-				setPlayerNum(playerNum);
-				isCreated = true;
-				joinB.setText("참가 하기");
-			}
-			else if(playerNum<=4 && isCreated == true) setPlayerNum(playerNum); else JOptionPane.showMessageDialog(this, "방이 가득 찼습니다.");
-		}
-		*/
 		if(e.getSource() == joinB && isClient == true && playerNum<4) {
 			ChatData cd = new ChatData(ChatType.Join, roomNumber);
 			roomListPanel.client.send(cd);

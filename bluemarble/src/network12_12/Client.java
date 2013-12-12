@@ -1,4 +1,4 @@
-package newNetwork;
+package network12_12;
 
 import java.awt.FileDialog;
 import java.io.IOException;
@@ -39,7 +39,7 @@ class Client extends Thread {
 		}
 	}
 	
-	public void showImage(ChatData cd){
+	public void showImage(ChatData cd){  //필요 없음
 		System.out.println("Got ImageIcon");
 		//ChatData cd = (ChatData)obj;
 		ImageIcon icon = (ImageIcon)cd.data;	    
@@ -54,7 +54,7 @@ class Client extends Thread {
 	    //clientUI.endScroll();		
 	}
 	
-	public void updateConnectorList(ChatData cd) {
+	public void updateConnectorList(ChatData cd) { 
 		if(cd.data!=null) {
 			String[] str = (String[]) cd.data;   
 			List<String> l = clientUI.lstConnector.getSelectedValuesList(); //선택되어 있던 명단을 기억
@@ -71,7 +71,7 @@ class Client extends Thread {
 		}
 	}
 	
-	public void getFile(ChatData cd) { //파일을 받는 메소드
+	public void getFile(ChatData cd) { //파일을 받는 메소드 //필요 없음
 		Object[] inData = new Object[2]; //파일 데이터의 경우 Object[0]는 보낸 사람의 InetAddress, Object[1]은 파일 이름(String)임. 
 		inData = (Object[]) cd.data;
 		int confirm = JOptionPane.showConfirmDialog(clientUI, cd.from+" " + inData[1]+ " 파일을 보내셨습니다. 저장하시겠습니까?", "choose one", JOptionPane.YES_NO_OPTION);
@@ -122,7 +122,8 @@ class Client extends Thread {
 									String msg = (String)cd.data;
 									if(msg.equals("Success")) {
 										System.out.println("방 접속 성공"); //방 접속 작업
-										inWaitingRoom = true;										
+										inWaitingRoom = true;
+										waitingRoom = new WaitingRoom(this);
 									}else JOptionPane.showMessageDialog(clientUI, msg);
 								break;
 							case RoomStatus: updateRoomStatus(cd); 
@@ -130,6 +131,10 @@ class Client extends Thread {
 							case WaitingRoomStatus: if(inWaitingRoom == true) updateWaitingRoomStatus(cd);
 								break;
 							case GameData: break;
+							case WaitingRoomChat: 
+								System.out.println("대기실 채팅 받기");
+								waitingRoom.doc.insertString(waitingRoom.doc.getLength(), cd.from + (String)cd.data + "\n", waitingRoom.sc.getStyle("MainSytle"));
+								break;
 							default:
 								break;					
 						}
@@ -145,8 +150,7 @@ class Client extends Thread {
 		}
 	}
 
-	synchronized private void updateWaitingRoomStatus(ChatData cd) {
-		System.out.println("대기실 작동");
+	synchronized private void updateWaitingRoomStatus(ChatData cd) {		
 		WaitingRoomStatus[] wrsAry = (WaitingRoomStatus[])cd.data;
 		WaitingRoomStatus wrs = null;
 		
@@ -155,14 +159,14 @@ class Client extends Thread {
 			for(String s: wrsAry[i].playerNames) {			
 				if (s!=null && s.equals(clientUI.clientAction.ID)) {
 					wrs = wrsAry[i];
+					if(inWaitingRoom == true && waitingRoom!= null) 
+						if(waitingRoom.isVisible()) waitingRoom.updateWaitingRoom(wrs);
 					break ForPlayers;
 				}
 			}			
-		}		
+		}
 		
 		if(startWaitingRoom == false && wrs!=null) {
-			waitingRoom = new WaitingRoom(wrs, this);
-			waitingRoom.setVisible(true);
 			startWaitingRoom = true;
 			clientUI.setVisible(false);
 		}
