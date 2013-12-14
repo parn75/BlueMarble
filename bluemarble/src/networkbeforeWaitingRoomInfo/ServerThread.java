@@ -1,4 +1,4 @@
-package network12_12night;
+package networkbeforeWaitingRoomInfo;
 
 import java.awt.FileDialog;
 import java.io.IOException;
@@ -21,6 +21,7 @@ class ServerThread extends Thread{
 	ObjectOutputStream oos;
 	ObjectInputStream ois;
 	int thisRoomNum = -1;
+	RoomListPanel roomList = RoomListPanel.getInstance();
 
 	public ServerThread(Server server, Socket socket, ServerUI serverUI){
 		this.server = server ; //서버의 정보
@@ -114,10 +115,9 @@ class ServerThread extends Thread{
 	}
 	
 	private void join(ChatData cd) { //대기실 참여
-		if (serverUI.roomList.joinRoom((int)cd.data, this.getName()) == true) {			
-			ChatData rd = new ChatData(ChatType.Join, "Success");
-			thisRoomNum = (int)cd.data;
-			server.waitingRoomList[(int)cd.data].addPlayer(this.getName());
+		if (roomList.joinRoom((int)cd.data, this.getName()) == true) {			
+			ChatData rd = new ChatData(ChatType.Join, "Success to join in room (" + (int)cd.data +")" );
+			thisRoomNum = (int)cd.data;			
 			server.send(rd, this);
 		}else {
 			//String[] to = {this.getName()};
@@ -130,7 +130,7 @@ class ServerThread extends Thread{
 	private void waitingRoomChat(ChatData cd) { //대기실 안에서 채팅
 		System.out.println("대기실 채팅 보내기");
 		ChatData rd = new ChatData(ChatType.WaitingRoomChat, cd.data);
-		String[] to = server.waitingRoomList[thisRoomNum].getPlayers();		
+		String[] to = roomList.roomList[thisRoomNum].getPlayerNames();		
 		rd.setTo(to); 
 		rd.setFrom(this.getName() + ":");
 		server.send(rd);
@@ -138,8 +138,9 @@ class ServerThread extends Thread{
 	
 
 	private void waitingRoomExit(ChatData cd) { //대기실 나감
-		serverUI.roomList.deletePlayer(thisRoomNum, this.getName());
-		server.waitingRoomList[thisRoomNum].deletePlayer(this.getName());
+		//serverUI.roomList.deletePlayer(thisRoomNum, this.getName());
+		roomList.deletePlayer(thisRoomNum, this.getName());
+		//server.waitingRoomList[thisRoomNum].deletePlayer(this.getName());
 	}
 
 	//클라이언트로부터 메세지를 받는 쓰레드
@@ -174,41 +175,4 @@ class ServerThread extends Thread{
 	}
 
 
-}
-
-class WaitingRoomList {
-	int roomNum;
-	int playerNum=0;
-	String[] players = new String[4];
-	
-	public WaitingRoomList() {
-		for(int i=0;i<players.length;i++) players[i] = "None";
-	}
-	
-	public int getRoomNum() {
-		return roomNum;
-	}
-	public void setRoomNum(int roomNum) {
-		this.roomNum = roomNum;
-	}
-	public String[] getPlayers() {
-		return players;
-	}
-	public void setPlayers(String[] players) {
-		this.players = players;
-	}
-	public void addPlayer(String player) {
-		this.players[playerNum] = player;
-		playerNum++;
-	}
-	public void deletePlayer(String player) {
-		for(int i=0;i<players.length;i++) {
-			if(players[i].equals(player)) {
-				for(int j=i;j<players.length-1;j++) 
-					if(players[j+1] != null || players[j+1] !="None") players[j] = players[j+1];
-					else players[j] = "None";
-				playerNum--;					
-			}
-		}
-	}
 }

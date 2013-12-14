@@ -1,4 +1,4 @@
-package network12_12night;
+package network12_14;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -15,21 +15,53 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
 public class RoomListPanel extends JPanel {  //각 대기실을 모아주기위한 바탕 패널
-	RoomPanel[] roomList = new RoomPanel[12];	
+	private static RoomListPanel Instance = new RoomListPanel();
+	RoomPanel[] roomList = new RoomPanel[12];
 	Server server;
 	Client client;
 	boolean isServer = false;
 	boolean isClient = false;
 	
+	public static RoomListPanel getInstance() {
+		return Instance;
+	}
+	
+	public WaitingRoomInfo[] getWholeRoomInfo() {
+		WaitingRoomInfo[] wholeRoomInfo = new WaitingRoomInfo[12];
+		for(int i=0;i<12;i++) {
+			wholeRoomInfo[i] = roomList[i].getRoomInfo();
+		}
+		return wholeRoomInfo;
+	}
+	
+	public WaitingRoomInfo[] cloneWholeRoomInfo() {
+		WaitingRoomInfo[] wrs = new WaitingRoomInfo[12];
+		for(int i=0;i<wrs.length;i++) {
+			wrs[i] = new WaitingRoomInfo();
+			wrs[i].setPlayerNames(roomList[i].roomInfo.getPlayerNames().clone());
+			wrs[i].setPlayerNum(roomList[i].roomInfo.getPlayerNum());
+			wrs[i].setRoomNum(roomList[i].roomInfo.getRoomNum());			
+			wrs[i].setRoomName(roomList[i].roomInfo.getRoomName());
+			wrs[i].setIsStarted(roomList[i].roomInfo.getIsStarted());
+		}	
+		return wrs;
+	}
+	
+	public void setWholeRoomInfo(WaitingRoomInfo[] wholeRoomInfo) {
+		for(int i=0;i<12;i++) {		
+			roomList[i].updateRoomInfo(wholeRoomInfo[i]);		
+		}
+	}
 
-	public RoomListPanel() {			
+	private RoomListPanel() {			
 		this.setLayout(new GridLayout(3,3));
 		for(int i=0;i<12;i++) {
-			roomList[i] = new RoomPanel(this, "빈 방", 0, i);
+			roomList[i] = new RoomPanel(this, "빈 방", i);
 			this.add(roomList[i]);
 		}
 	}
@@ -66,7 +98,7 @@ public class RoomListPanel extends JPanel {  //각 대기실을 모아주기위한 바탕 패�
 	    }
 	    ig2.setColor(Color.gray);
 	    ig2.fill3DRect(200, 40, 100, 30, true);  //Join 버튼
-	    ig2.setColor(color.black);
+	    ig2.setColor(Color.black);
 	    ig2.drawString("Join", 230, 60);
 	    return bi;
 	}	
@@ -98,52 +130,45 @@ public class RoomListPanel extends JPanel {  //각 대기실을 모아주기위한 바탕 패�
 		jf.add(rlp);
 		jf.setVisible(true);
 	}
+	
+
 
 }
 
-class RoomPanel extends JPanel implements MouseListener{ 
-	int roomNumber; //이 방의 넘버
+class RoomPanel extends JPanel implements MouseListener{
 	JLabel roomName; //방제
 	JLabel players; //플레이어 숫자를 표시하기 위한 라벨
 	JButton joinB;
-	int playerNum=0; //플레이어 숫자
-	String[] playerNames = new String[4]; //플레이어의 이름을 담기 위한 배열
+	WaitingRoomInfo roomInfo = new WaitingRoomInfo();
 	boolean isCreated = false;
 	boolean isClient = false; //클라이언트에 있는 패널인지?
 	boolean isServer = false; //서버에 있는 패널인지?
 	boolean isStarted = false; 
 	RoomListPanel roomListPanel;
 	
-	public String[] getPlayerNames() {
-		return playerNames;
+	public StringBuffer[] getPlayerNames() {
+		return roomInfo.getPlayerNames();
+	}
+	
+	public void updateRoomInfo(WaitingRoomInfo roomInfo) {
+		this.roomInfo = roomInfo;
+		if(roomInfo.getRoomName() != null) roomName.setText(roomInfo.getRoomName().toString());
+		setPlayerNum(roomInfo.getPlayerNum());		
 	}
 	
 	synchronized public boolean joinRoom(String playerName) {	//플레이어가 참가한 경우 ServerThread에서만 호출
-		if(playerNum<=4) {
-			playerNames[playerNum] = playerName;
-			System.out.println(playerNames[playerNum]);	
-			if(playerNum == 1) joinB.setText("참가하기");
-			if(playerNum <4) playerNum++;
-			setPlayerNum(playerNum);
-			return true;
-		}
-		if(playerNum == 4) joinB.setEnabled(false);
-		if(playerNum>4) playerNum = 4;
-		return false;
+		if(roomInfo.getPlayerNum() >= 4) return false;		
+		int result = roomInfo.joinRoom(new StringBuffer(playerName));		
+		if(result <=4) setPlayerNum(roomInfo.getPlayerNum());
+		if(result == 4) joinB.setEnabled(false); 
+		return true;
 	}
 	
-	synchronized public void deletePlayer(String player) { //플레이어가 나간 경우 ServerThread에서만 호출
+	synchronized public void deletePlayer(String player) { //플레이어가 나간 경우 ServerThread에서만 호출		
+		int result = roomInfo.deletePlayer(player);
+		setPlayerNum(result);
+		if(result==0) joinB.setText("게임 만들기");
 		
-		for(int i=0;i<playerNames.length;i++) {
-			if(playerNames[i].equals(player)) {
-				for(int j=i;j<playerNames.length-1;j++) 
-					if(playerNames[j+1] != null || playerNames[j+1] !="None") playerNames[j] = playerNames[j+1];
-					else playerNames[j] = "None";				
-			}
-		}
-		playerNum--;
-		setPlayerNum(playerNum);
-		if(playerNum==0) joinB.setText("게임 만들기");
 	}
 	
 	public BufferedImage onePanel() { //패널의 바탕을 칠한다. 외부 이미지 로딩으로 변경?
@@ -162,15 +187,14 @@ class RoomPanel extends JPanel implements MouseListener{
 	    
 	}
 	
-	public RoomPanel(RoomListPanel roomListPanel, String title, int playerNum, int roomNumber) {
-		for(int i=0;i<playerNames.length;i++) playerNames[i] = "None";
-		this.roomNumber = roomNumber;
+	public RoomPanel(RoomListPanel roomListPanel, String title, int roomNumber) {		
+		roomInfo.setRoomNum(roomNumber); 
+		roomInfo.setRoomName(new StringBuffer(title));
 		this.roomListPanel = roomListPanel;
 		this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		this.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
-		roomName = new JLabel(title);
-		this.playerNum = playerNum;
-		players = new JLabel("참가 인원: " + playerNum);
+		roomName = new JLabel(title);		
+		players = new JLabel("참가 인원: " + roomInfo.getPlayerNum());
 		joinB = new JButton("게임 만들기");
 		this.add(roomName);
 		this.add(players);
@@ -196,19 +220,24 @@ class RoomPanel extends JPanel implements MouseListener{
 	
 	public void setPlayerNum(int playerNum) {
 		if(playerNum == 0) joinB.setText("게임 만들기");
-		if(playerNum == 1) joinB.setText("참가하기");
+		if(playerNum > 0 && playerNum<= 4) joinB.setText("참가하기");
 		if(playerNum == 4) joinB.setEnabled(false);
+		if(playerNum < 4 && isClient == true) joinB.setEnabled(true);
 		if(playerNum>=0 && playerNum<=4) {
 			players.setText("참가 인원: " + playerNum);
 		}
 	}
 	
-	public String getTitle() {
-		return roomName.getText();
+	public WaitingRoomInfo getRoomInfo() {
+		return roomInfo;
 	}
 	
-	public int getPlayerNum() {
-		return playerNum;
+	public void setRoomInfo(WaitingRoomInfo roomInfo) {
+		this.roomInfo = roomInfo;
+	}
+	
+	public String getTitle() {
+		return roomName.getText();
 	}
 	
 	public void setJoinable() {
@@ -229,8 +258,14 @@ class RoomPanel extends JPanel implements MouseListener{
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if(e.getSource() == joinB && isClient == true && playerNum<4) {
-			ChatData cd = new ChatData(ChatType.Join, roomNumber);
+		if(e.getSource() == joinB && isClient == true && roomInfo.getPlayerNum()<4) {
+			WaitingRoomInfo wri = new WaitingRoomInfo();
+			if(joinB.getText() == "게임 만들기") {
+				String title = JOptionPane.showInputDialog("방 제목을 입력해 주세요.");
+				wri.setRoomName(new StringBuffer(title));
+			}else wri.setRoomName(new StringBuffer("참가"));			
+			wri.setRoomNum(roomInfo.getRoomNum());
+			ChatData cd = new ChatData(ChatType.Join, wri);
 			roomListPanel.client.send(cd);
 			//클라이언트의 경우 서버에 참가 여부를 보내고 Client에서 Success메세지를 받으면 대기실 시작
 		}

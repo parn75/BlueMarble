@@ -1,15 +1,21 @@
-package network12_12night;
+package network12_14;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
+import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
 
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -24,16 +30,14 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleContext;
 
 
-public class WaitingRoom extends JFrame implements ActionListener, WindowListener{
+public class WaitingRoomUI extends JFrame implements ActionListener, WindowListener{
 	public boolean debug = true;
 	private final int XSIZE = 500, YSIZE = 550;
 	private static final long serialVersionUID = -8584629477552591872L;
 	
-	JLabel lblHost = new JLabel("Host Name ");
-	JTextField hostname = new JTextField();
-	JLabel lblID = new JLabel("ID ");
-	JTextField fldID = new JTextField();
-	JButton btnConnect = new JButton("Connect");	
+	JLabel lblHost = new JLabel("Host Name");
+	JButton gameStartB = new JButton("게임 시작");
+
 	JButton btnPersonalMsg = new JButton("Send");	
 	JTextField fldChat = new JTextField();
 	
@@ -59,15 +63,14 @@ public class WaitingRoom extends JFrame implements ActionListener, WindowListene
 	
 	ClientAction clientAction;
 	Client client;
-	WaitingRoomStatus wrs;
+	WaitingRoomInfo myRoomInfo;
 	JLabel[] players = new JLabel[4];
 
 	private void start() {		
-		btnConnect.addActionListener(this);		
+		gameStartB.addActionListener(this);		
 		btnPersonalMsg.addActionListener(this);
 		photoMenuItem.addActionListener(this);
-		fileMenuItem.addActionListener(this);
-		fldID.addActionListener(this);
+		fileMenuItem.addActionListener(this);		
 		fldChat.addActionListener(this);		
 	}
 	
@@ -77,42 +80,51 @@ public class WaitingRoom extends JFrame implements ActionListener, WindowListene
 		//txtChat.requestFocus();
 	}
 	
+	public BufferedImage drawRoom(String roomName, int firstColor, int medianColor) {
+		int fontSize = 30;
+		int roomHeight = 100;
+		BufferedImage bi = new BufferedImage(XSIZE, roomHeight, BufferedImage.TYPE_INT_ARGB); 
+		Graphics2D ig2 = bi.createGraphics();
+		int c = 255/roomHeight;
+		for(int i=0;i<=roomHeight;i++) {			
+			Color color = new Color(c*i,firstColor , medianColor);
+			ig2.setPaint(color);
+			ig2.drawLine(0, i, XSIZE, i);
+		}
+
+	    ig2.setPaint(Color.black);
+	    Font f = new Font("굴림", Font.BOLD, fontSize);
+	    ig2.setFont(f);
+	    int fx = (XSIZE - fontSize*roomName.length()/2)/2;
+	    ig2.drawString(roomName, fx, roomHeight/2 + fontSize/2);
+	    return bi;
+	}
+	
 	private void init() {
 		Container con = this.getContentPane();
 		con.setLayout(new BorderLayout());
-		pnlConnect.setLayout(new BoxLayout(pnlConnect,BoxLayout.X_AXIS));
-		pnlConnect.add(lblHost);
-		pnlConnect.add(hostname);
-		pnlConnect.add(lblID);
-		pnlConnect.add(fldID);
-		pnlConnect.add(btnConnect);
-		con.add(pnlConnect, "North");		
-	
-		middleP.setLayout(new GridLayout(5,1));
+		//pnlConnect.setLayout(new BoxLayout(pnlConnect,BoxLayout.X_AXIS));
+		pnlConnect.setLayout(new BorderLayout());
+		Icon ic = new ImageIcon(drawRoom("방 이름",200, 200));
+		lblHost.setIcon(ic);
+		pnlConnect.add(lblHost, "North");
+		pnlConnect.add(gameStartB, "South");
+		con.add(pnlConnect, "North");
 		
+		middleP.setLayout(new GridLayout(5,1));	
+
 		for(int i=0;i<4;i++) {
 			players[i] = new JLabel();
+			ic = new ImageIcon(drawRoom("None", 100, 130+30*i));
+			players[i].setIcon(ic);
 			middleP.add(players[i]);
-			if(wrs!= null)
-				if(wrs.playerNames[i]!=null) players[i].setText(wrs.playerNames[i]); else players[i].setText("None");			
+			if(myRoomInfo!= null)
+				if(myRoomInfo.getPlayerNames()[i]!=null) players[i].setText(myRoomInfo.getPlayerNames()[i].toString()); else players[i].setText("None");			
 		}
-/*
-		if(wrs!=null) {
-			for(int i=0;i<4;i++) {
-				if(wrs.playerNames[i]!=null && wrs!=null) players[i].setText(wrs.playerNames[i]); else players[i].setText("None");				
-			}
-		}
-	*/	
 		txtChat.setEditable(false);
 		middleP.add(txtChat);
 		sp = new JScrollPane(txtChat);  //Adding Scroll Bar		
 		middleP.add(sp);
-	/*	
-		players[0].setBackground(Color.blue);
-		players[0].setOpaque(false);
-		middleP.setBackground( new Color(255, 0, 0, 20) );
-		this.add( new AlphaContainer(middleP), "Center");
-	*/
 		con.add(middleP, "Center");
 	
 		chatStyle = new ChatDocStyles(sc);
@@ -120,25 +132,34 @@ public class WaitingRoom extends JFrame implements ActionListener, WindowListene
 		pnlBroadcast.setLayout(new BoxLayout(pnlBroadcast,BoxLayout.X_AXIS));		
 		pnlBroadcast.add(fldChat);
 		pnlBroadcast.add(btnPersonalMsg);		
-		con.add(pnlBroadcast,"South");
-				
-		fileMenu.add(photoMenuItem);
-		fileMenu.add(fileMenuItem);
-		menuBar.add(fileMenu);		
-		this.setJMenuBar(menuBar);		
+		con.add(pnlBroadcast,"South");	
 	}
-	
-	public void updateWaitingRoom(WaitingRoomStatus wrs) {
-		if (wrs==null) return;
+	/*
+	public void updateWaitingRoom(WaitingRoomInfo roomInfo) {
+		System.out.println("updating waiting room");
+		if (roomInfo==null) return;
+		System.out.println("roomInfo is not null");
+		System.out.println(roomInfo.getPlayerNum() +  roomInfo.getPlayerNames()[0].toString());
+		for(int i=0;i<4;i++) {
+			if(roomInfo.getPlayerNames()[i]!=null) players[i].setText(roomInfo.getPlayerNames()[i].toString()); else players[i].setText("None");		
+		}
+	}
+	*/
+	public void updateWaitingRoom(WaitingRoomInfo roomInfo) {		
+		if (roomInfo==null) return;		
 		
-		for(int i=0;i<4;i++) {		
-			if(wrs.playerNames[i]!=null) players[i].setText(wrs.playerNames[i]); else players[i].setText("None");		
+		Icon ic = new ImageIcon(drawRoom(roomInfo.getRoomName().toString(), 200, 200));
+		lblHost.setIcon(ic);
+		
+		for(int i=0;i<4;i++) {
+			ic = new ImageIcon(drawRoom(roomInfo.getPlayerNames()[i].toString(), 100, 170+20*i));
+			players[i].setIcon(ic);			
 		}
 	}
 	
-	public WaitingRoom(WaitingRoomStatus wrs, Client client) {
-		super(wrs.title);
-		this.wrs = wrs;
+	public WaitingRoomUI(WaitingRoomInfo roomInfo, Client client) {
+		super(roomInfo.getRoomName().toString());
+		this.myRoomInfo = roomInfo;
 		this.client = client;
 		init();
 		start();
@@ -150,7 +171,7 @@ public class WaitingRoom extends JFrame implements ActionListener, WindowListene
 		setVisible(true);
 	}
 	
-	public WaitingRoom(Client client) {
+	public WaitingRoomUI(Client client) {
 		//super(wrs.title);
 		//this.wrs = wrs;
 		this.client = client;
@@ -175,7 +196,9 @@ public class WaitingRoom extends JFrame implements ActionListener, WindowListene
 			String msg = fldChat.getText();		
 			client.send(new ChatData(ChatType.WaitingRoomChat,msg));	
 			fldChat.setText("");
-		}		
+		}if(e.getSource()==gameStartB) {	
+			System.out.println("게임이 시작됩니다.");
+		}
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package network12_12night;
+package network12_13;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -92,7 +92,7 @@ public class ClientUI extends JFrame{
 		middleP.setLayout(new GridLayout(2,1));
 		txtChat.setEditable(false);
 		middleP.add(txtChat);
-		roomList = new RoomListPanel();
+		roomList = RoomListPanel.getInstance();
 		
 		sp = new JScrollPane(txtChat);  //Adding Scroll Bar		
 

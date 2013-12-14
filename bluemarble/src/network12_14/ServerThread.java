@@ -1,4 +1,4 @@
-package network12_12night;
+package network12_14;
 
 import java.awt.FileDialog;
 import java.io.IOException;
@@ -21,6 +21,7 @@ class ServerThread extends Thread{
 	ObjectOutputStream oos;
 	ObjectInputStream ois;
 	int thisRoomNum = -1;
+	RoomListPanel roomList = RoomListPanel.getInstance();
 
 	public ServerThread(Server server, Socket socket, ServerUI serverUI){
 		this.server = server ; //서버의 정보
@@ -40,9 +41,9 @@ class ServerThread extends Thread{
 	public void send(Object obj) {
 		try {
 			oos.writeObject(obj);
-			oos.flush();
-		} catch (IOException e) {			
-			e.printStackTrace();
+			oos.flush();		
+		} catch (IOException e) {
+			System.out.println(this.getName() + "님이 접속을 종료하여 데이터가 전송되지 않았습니다.");
 		}
 	}	
 	public boolean isContain(String[] str, String search) { 
@@ -114,32 +115,55 @@ class ServerThread extends Thread{
 	}
 	
 	private void join(ChatData cd) { //대기실 참여
-		if (serverUI.roomList.joinRoom((int)cd.data, this.getName()) == true) {			
-			ChatData rd = new ChatData(ChatType.Join, "Success");
-			thisRoomNum = (int)cd.data;
-			server.waitingRoomList[(int)cd.data].addPlayer(this.getName());
+		WaitingRoomInfo wri = (WaitingRoomInfo)cd.data;
+		if (roomList.joinRoom(wri.getRoomNum(), this.getName()) == true) {			
+			ChatData rd = new ChatData(ChatType.Join, "Success to join in room (" + wri.getRoomNum() +")" );
 			server.send(rd, this);
+			sendRoomStatus();
+			thisRoomNum = wri.getRoomNum();
+			if(!wri.getRoomName().toString().equals("참가")) {
+				roomList.setRoom(wri.getRoomNum(), wri.getRoomName().toString());
+				roomList.roomList[wri.getRoomNum()].roomInfo.setRoomName(wri.getRoomName());
+			}			
 		}else {
 			//String[] to = {this.getName()};
 			ChatData rd = new ChatData(ChatType.Join, "방이 가득찼습니다.");
 			server.send(rd, this);
 		}
-	}
-	
+	}	
 
 	private void waitingRoomChat(ChatData cd) { //대기실 안에서 채팅
 		System.out.println("대기실 채팅 보내기");
 		ChatData rd = new ChatData(ChatType.WaitingRoomChat, cd.data);
-		String[] to = server.waitingRoomList[thisRoomNum].getPlayers();		
+		String[] to = new String[roomList.roomList[thisRoomNum].getPlayerNames().length];
+		for(int i=0;i<roomList.roomList[thisRoomNum].getPlayerNames().length;i++)
+							to[i] = roomList.roomList[thisRoomNum].getPlayerNames()[i].toString();	
+		System.out.println(to[0] + to[1]);
 		rd.setTo(to); 
 		rd.setFrom(this.getName() + ":");
 		server.send(rd);
 	}
 	
 
-	private void waitingRoomExit(ChatData cd) { //대기실 나감
-		serverUI.roomList.deletePlayer(thisRoomNum, this.getName());
-		server.waitingRoomList[thisRoomNum].deletePlayer(this.getName());
+	private void waitingRoomExit(ChatData cd) { //대기실 나감		
+		roomList.deletePlayer(thisRoomNum, this.getName());
+		sendRoomStatus();
+	}
+	
+	public void sendRoomStatus() {		
+		WaitingRoomInfo[] wrs = roomList.cloneWholeRoomInfo(); //roomList.getWholeRoomInfo()로는 안됨? why? -_-;; 미치미치미치
+		ChatData cd = new ChatData(ChatType.RoomStatus, wrs);			
+		if(server.clientMap.size()>0) {
+			server.broadcast(cd);		
+		}
+		
+	}
+	
+	public void exitProgram() {
+		server.removeThread( this.getName() ); //소켓이 닫힌 경우(읽을 수 없는 경우) 쓰레드 및 리스트 제거	
+		server.broadcast(new ChatData(ChatType.Broadcast, "Server: ", "[" + this.getName() + "]님이 나가셨습니다."));
+		server.sendConnectorList();
+		System.out.println(socket.getInetAddress() + "의 연결이 종료되었습니다.");
 	}
 
 	//클라이언트로부터 메세지를 받는 쓰레드
@@ -160,55 +184,20 @@ class ServerThread extends Thread{
 				case Join: join(cd); break; //대기실 참가
 				case WaitingRoomChat: waitingRoomChat(cd); break; //대기실 대화
 				case WaitingRoomExit: waitingRoomExit(cd); break; //대기실 나감
+				case Exit: exitProgram(); break;
 				default:
 					break;
 
 				}
 			}		
-		}catch (IOException | ClassNotFoundException e){			
-				server.removeThread( this.getName() ); //소켓이 닫힌 경우(읽을 수 없는 경우) 쓰레드 및 리스트 제거
-				//server.broadcast("[" + this.getName() + "]님이 나가셨습니다.");
-				server.broadcast(new ChatData(ChatType.Broadcast, "Server: ", "[" + this.getName() + "]님이 나가셨습니다."));
-				System.out.println(socket.getInetAddress() + "의 연결이 종료되었습니다.");		
+		}catch (IOException | ClassNotFoundException e){
+				if(server.clientMap.containsKey(this.getName())) {
+					server.removeThread( this.getName() ); //소켓이 닫힌 경우(읽을 수 없는 경우) 쓰레드 및 리스트 제거					
+					server.broadcast(new ChatData(ChatType.Broadcast, "Server: ", "[" + this.getName() + "]님이 나가셨습니다."));
+					System.out.println(socket.getInetAddress() + "의 연결이 종료되었습니다.");	
+				}
 		}	
 	}
 
 
-}
-
-class WaitingRoomList {
-	int roomNum;
-	int playerNum=0;
-	String[] players = new String[4];
-	
-	public WaitingRoomList() {
-		for(int i=0;i<players.length;i++) players[i] = "None";
-	}
-	
-	public int getRoomNum() {
-		return roomNum;
-	}
-	public void setRoomNum(int roomNum) {
-		this.roomNum = roomNum;
-	}
-	public String[] getPlayers() {
-		return players;
-	}
-	public void setPlayers(String[] players) {
-		this.players = players;
-	}
-	public void addPlayer(String player) {
-		this.players[playerNum] = player;
-		playerNum++;
-	}
-	public void deletePlayer(String player) {
-		for(int i=0;i<players.length;i++) {
-			if(players[i].equals(player)) {
-				for(int j=i;j<players.length-1;j++) 
-					if(players[j+1] != null || players[j+1] !="None") players[j] = players[j+1];
-					else players[j] = "None";
-				playerNum--;					
-			}
-		}
-	}
 }

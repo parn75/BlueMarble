@@ -88,10 +88,10 @@ public class ServerUI extends JFrame{
 		middleP.add(txtChat);
 		roomList = new RoomListPanel();		
 		sp = new JScrollPane(txtChat);  //Adding Scroll Bar		
-
-		middleP.add(roomList);	
+	
+		middleP.add(roomList);
 		middleP.add(sp);
-		con.add(middleP, "Center");	
+		con.add(middleP, "Center");		
 
 		pnlBroadcast.setLayout(new BoxLayout(pnlBroadcast,BoxLayout.X_AXIS));
 		pnlBroadcast.add(fldChat);

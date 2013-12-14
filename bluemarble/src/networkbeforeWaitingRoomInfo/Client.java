@@ -1,4 +1,4 @@
-package network12_12night;
+package networkbeforeWaitingRoomInfo;
 
 import java.awt.FileDialog;
 import java.io.IOException;
@@ -6,8 +6,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-//GUI
-//event
 import java.util.List;
 
 import javax.swing.ImageIcon;
@@ -19,10 +17,11 @@ class Client extends Thread {
 	Socket socket ; //서버와 통신
 	ClientUI clientUI;
 	String hostname;
-	WaitingRoom waitingRoom;
+	WaitingRoomUI waitingRoom;
 	boolean inWaitingRoom = false;
 	boolean startWaitingRoom = false;
 	boolean inGame = false;
+	int myRoomNum = -1;
 
 	ObjectOutputStream oos;
 	ObjectInputStream ois;
@@ -120,15 +119,20 @@ class Client extends Thread {
 								break;
 							case Join: //대기실 참가
 									String msg = (String)cd.data;
-									if(msg.equals("Success")) {
+									if(msg.contains("Success")) {
 										System.out.println("방 접속 성공"); //방 접속 작업
+										myRoomNum = Integer.parseInt(msg.substring(msg.lastIndexOf('(')+1, msg.lastIndexOf(')') ));
+										System.out.println("MyRoomNum: " + myRoomNum +"");
 										inWaitingRoom = true;
-										waitingRoom = new WaitingRoom(this);
+										waitingRoom = new WaitingRoomUI(this);
+										clientUI.setVisible(false);
 									}else JOptionPane.showMessageDialog(clientUI, msg);
 								break;
-							case RoomStatus: updateRoomStatus(cd); //전체 대기실 상태 데이터
+							case RoomStatus: 		
+								//System.out.println((String)cd.data);
+								updateRoomStatus(cd); //전체 대기실 상태 데이터
 								break;
-							case WaitingRoomStatus: if(inWaitingRoom == true) updateWaitingRoomStatus(cd); //내가 접속해있는 대기실 상태 데이터
+							case WaitingRoomStatus: //if(inWaitingRoom == true) updateWaitingRoomStatus(cd); //내가 접속해있는 대기실 상태 데이터
 								break;
 							case GameData: break; //게임 데이터를 위해 예약
 							case WaitingRoomChat:  //대기실 내부 채팅								
@@ -150,37 +154,17 @@ class Client extends Thread {
 		}
 	}
 
-	synchronized private void updateWaitingRoomStatus(ChatData cd) { //내가 들어가 있는 대기실 상태 업데이트
-		WaitingRoomStatus[] wrsAry = (WaitingRoomStatus[])cd.data;
-		WaitingRoomStatus wrs = null;
-		
-		ForPlayers: 
-		for(int i=0;i<12;i++) {		
-			for(String s: wrsAry[i].playerNames) {			
-				if (s!=null && s.equals(clientUI.clientAction.ID)) {
-					wrs = wrsAry[i];
-					if(inWaitingRoom == true && waitingRoom!= null) 
-						if(waitingRoom.isVisible()) waitingRoom.updateWaitingRoom(wrs);
-					break ForPlayers;
-				}
-			}			
-		}
-		
-		if(startWaitingRoom == false && wrs!=null) {
-			startWaitingRoom = true;
-			clientUI.setVisible(false);
-		}
-	}
-
 	synchronized private void updateRoomStatus(ChatData cd) { //전체 대기실 상태 업데이트
-		RoomStatus rs = (RoomStatus)(cd.data);
-		for(int i=0;i<12;i++) {
-			clientUI.roomList.roomList[i].setTitle(rs.roomTitle[i]);
-			clientUI.roomList.roomList[i].setPlayerNum(rs.playerNum[i]);
-			if(rs.playerNum[i]>0) clientUI.roomList.roomList[i].joinB.setText("참가하기");
-			else if (rs.playerNum[i]==4) clientUI.roomList.roomList[i].joinB.setEnabled(false);
-			clientUI.roomList.roomList[i].setStarted(rs.isStarted[i]);
+
+		RoomListPanel roomList = RoomListPanel.getInstance();
+		WaitingRoomInfo[] wholeInfo = (WaitingRoomInfo[])(cd.data);	
+		roomList.setWholeRoomInfo(wholeInfo);
+
+		if(inWaitingRoom==true && myRoomNum>=0) {
+			if(waitingRoom.isVisible()) waitingRoom.updateWaitingRoom(wholeInfo[myRoomNum]);
+			System.out.println("방 업데이트");
 		}
+		
 	}
 
 	public void send(Object obj) { //데이터 전송

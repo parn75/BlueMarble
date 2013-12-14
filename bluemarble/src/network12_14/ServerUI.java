@@ -1,17 +1,17 @@
-package network12_12night;
+package network12_14;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.GridLayout;
-import java.awt.image.BufferStrategy;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -23,33 +23,26 @@ import javax.swing.JTextPane;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleContext;
 
-public class ClientUI extends JFrame{
-	public boolean debug = true;
-	private final int XSIZE = 500, YSIZE = 550;
-	private static final long serialVersionUID = -8584629477552591872L;
-	
-	JLabel lblHost = new JLabel("Host Name ");
-	JTextField hostname = new JTextField();
-	JLabel lblID = new JLabel("ID ");
-	JTextField fldID = new JTextField();
-	JButton btnConnect = new JButton("Connect");	
-	JButton btnPersonalMsg = new JButton("Send");	
-	JTextField fldChat = new JTextField();
-	JList<String> lstConnector = new JList<String>();
+public class ServerUI extends JFrame{
+	boolean debug = true;
+	private static final long serialVersionUID = -5472820133041236799L;
+	JTextField hostInfo;
+	JButton btnSvrStart = new JButton("Server Start");
+	JPanel topP = new JPanel();
+	JButton btnBroadcast = new JButton("To All");
+	JButton btnPersonalMsg = new JButton("To Selected People");
+	JTextField fldChat = new JTextField();	
 	DefaultListModel<String> listModel = new DefaultListModel<String>();
+	JList<String> lstConnector; 	
 	JPanel pnlBroadcast = new JPanel();
-	JPanel pnlConnect = new JPanel();
 	
 	//채팅 및 이미지 표시 부분, 스크롤 설정 및 스타일 지정
-	RoomListPanel roomList;
-	BufferStrategy bs;
 	JPanel middleP = new JPanel();
-	JPanel middleP2 = new JPanel();
+	RoomListPanel roomList;
 	StyleContext sc = new StyleContext();
     final DefaultStyledDocument doc = new DefaultStyledDocument(sc);
-	JTextPane txtChat = new JTextPane(doc);
+	JTextPane txtChat= new JTextPane(doc);
 	JScrollPane sp;
-	JScrollPane roomScroll;
 	ChatDocStyles chatStyle;
 	
 	//메뉴바 설정
@@ -58,19 +51,7 @@ public class ClientUI extends JFrame{
 	JMenuItem photoMenuItem = new JMenuItem("사진 보내기");
 	JMenuItem fileMenuItem = new JMenuItem("파일 전송");
 	
-	ClientAction clientAction;
-
-
-	private void start() {
-		clientAction = new ClientAction(this);
-		btnConnect.addActionListener(clientAction);		
-		btnPersonalMsg.addActionListener(clientAction);
-		photoMenuItem.addActionListener(clientAction);
-		fileMenuItem.addActionListener(clientAction);
-		fldID.addActionListener(clientAction);
-		fldChat.addActionListener(clientAction);
-		roomList.setClient(clientAction.client);
-	}
+	ServerAction svrAction;
 	
 	public void endScroll() {  //Scroll을 가장 아래로 내리기 위한 메소드		
 		int pos = doc.getLength();		
@@ -78,60 +59,73 @@ public class ClientUI extends JFrame{
 		//txtChat.requestFocus();
 	}
 	
+	private void start() {
+		svrAction = new ServerAction(this);
+		btnSvrStart.addActionListener(svrAction);
+		btnBroadcast.addActionListener(svrAction);
+		btnPersonalMsg.addActionListener(svrAction);
+		photoMenuItem.addActionListener(svrAction);
+		fldChat.addActionListener(svrAction);
+		roomList.setServer(svrAction.server);
+	}
+	
 	private void init() {
 		Container con = this.getContentPane();
 		con.setLayout(new BorderLayout());
-		pnlConnect.setLayout(new BoxLayout(pnlConnect,BoxLayout.X_AXIS));
-		pnlConnect.add(lblHost);
-		pnlConnect.add(hostname);
-		pnlConnect.add(lblID);
-		pnlConnect.add(fldID);
-		pnlConnect.add(btnConnect);
-		con.add(pnlConnect, "North");		
-	
+		hostInfo = new JTextField();
+		try {
+			hostInfo.setText("Server Address: " + InetAddress.getLocalHost().getHostAddress());
+		} catch (UnknownHostException e) {			
+			e.printStackTrace();
+		}
+		hostInfo.setEditable(false);
+		topP.add(hostInfo);
+		topP.add(btnSvrStart);
+		con.add(topP, "North");
+		
 		middleP.setLayout(new GridLayout(2,1));
 		txtChat.setEditable(false);
 		middleP.add(txtChat);
-		roomList = new RoomListPanel();
-		
+		roomList = RoomListPanel.getInstance();		
 		sp = new JScrollPane(txtChat);  //Adding Scroll Bar		
-
-		middleP.add(roomList);	
-		middleP.add(sp);
-		con.add(middleP, "Center");	
 	
-		chatStyle = new ChatDocStyles(sc);
+		middleP.add(roomList);
+		middleP.add(sp);
+		con.add(middleP, "Center");		
 
-		pnlBroadcast.setLayout(new BoxLayout(pnlBroadcast,BoxLayout.X_AXIS));		
+		pnlBroadcast.setLayout(new BoxLayout(pnlBroadcast,BoxLayout.X_AXIS));
 		pnlBroadcast.add(fldChat);
-		pnlBroadcast.add(btnPersonalMsg);		
-		con.add(pnlBroadcast,"South");
+		pnlBroadcast.add(btnPersonalMsg);
+		pnlBroadcast.add(btnBroadcast);	
+		con.add(pnlBroadcast,"South");		
 		
 		listModel.addElement("To All");
 		lstConnector = new JList<String>(listModel);
 		con.add(lstConnector, "East");
 		lstConnector.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-				
+		
 		fileMenu.add(photoMenuItem);
 		fileMenu.add(fileMenuItem);
 		menuBar.add(fileMenu);		
-		this.setJMenuBar(menuBar);	
+		this.setJMenuBar(menuBar);
 		
 	}
 	
-	public ClientUI(String title) {
+	public ServerUI(String title) {
 		super(title);
 		init();
 		start();
-		this.setSize(XSIZE,YSIZE);
+		this.setSize(500,550);
 		this.setResizable(true);
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setLocationByPlatform(true);		
 		setVisible(true);
 	}
-
 	
-	public static void main(String[] args) {		
-		ClientUI cUI = new ClientUI("Client");
+	
+	public static void main(String[] args) {
+		@SuppressWarnings("unused")
+		ServerUI sUI = new ServerUI("Server");
 	}
+
 }

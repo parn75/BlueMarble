@@ -1,4 +1,4 @@
-package network12_12night;
+package networkbeforeWaitingRoomInfo;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -24,7 +24,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleContext;
 
 
-public class WaitingRoom extends JFrame implements ActionListener, WindowListener{
+public class WaitingRoomUI extends JFrame implements ActionListener, WindowListener{
 	public boolean debug = true;
 	private final int XSIZE = 500, YSIZE = 550;
 	private static final long serialVersionUID = -8584629477552591872L;
@@ -59,7 +59,7 @@ public class WaitingRoom extends JFrame implements ActionListener, WindowListene
 	
 	ClientAction clientAction;
 	Client client;
-	WaitingRoomStatus wrs;
+	WaitingRoomInfo myRoomInfo;
 	JLabel[] players = new JLabel[4];
 
 	private void start() {		
@@ -93,8 +93,8 @@ public class WaitingRoom extends JFrame implements ActionListener, WindowListene
 		for(int i=0;i<4;i++) {
 			players[i] = new JLabel();
 			middleP.add(players[i]);
-			if(wrs!= null)
-				if(wrs.playerNames[i]!=null) players[i].setText(wrs.playerNames[i]); else players[i].setText("None");			
+			if(myRoomInfo!= null)
+				if(myRoomInfo.getPlayerNames()[i]!=null) players[i].setText(myRoomInfo.getPlayerNames()[i]); else players[i].setText("None");			
 		}
 /*
 		if(wrs!=null) {
@@ -128,17 +128,19 @@ public class WaitingRoom extends JFrame implements ActionListener, WindowListene
 		this.setJMenuBar(menuBar);		
 	}
 	
-	public void updateWaitingRoom(WaitingRoomStatus wrs) {
-		if (wrs==null) return;
-		
-		for(int i=0;i<4;i++) {		
-			if(wrs.playerNames[i]!=null) players[i].setText(wrs.playerNames[i]); else players[i].setText("None");		
+	public void updateWaitingRoom(WaitingRoomInfo roomInfo) {
+		System.out.println("updating waiting room");
+		if (roomInfo==null) return;
+		System.out.println("roomInfo is not null");
+		System.out.println(roomInfo.getPlayerNum() + roomInfo.getRoomName() + roomInfo.getPlayerNames()[0]);
+		for(int i=0;i<4;i++) {
+			if(roomInfo.getPlayerNames()[i]!=null) players[i].setText(roomInfo.getPlayerNames()[i]); else players[i].setText("None");		
 		}
 	}
 	
-	public WaitingRoom(WaitingRoomStatus wrs, Client client) {
-		super(wrs.title);
-		this.wrs = wrs;
+	public WaitingRoomUI(WaitingRoomInfo roomInfo, Client client) {
+		super(roomInfo.getRoomName());
+		this.myRoomInfo = roomInfo;
 		this.client = client;
 		init();
 		start();
@@ -150,7 +152,7 @@ public class WaitingRoom extends JFrame implements ActionListener, WindowListene
 		setVisible(true);
 	}
 	
-	public WaitingRoom(Client client) {
+	public WaitingRoomUI(Client client) {
 		//super(wrs.title);
 		//this.wrs = wrs;
 		this.client = client;
