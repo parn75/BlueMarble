@@ -7,7 +7,7 @@ public enum ChatType {
 	 */
 	
 	Broadcast(1), Whisper(2), Image(3), File(4), ID(5), ConnectorList(6), Join(7), RoomStatus(8), GameData(9),
-	WaitingRoomStatus(10), WaitingRoomChat(11), WaitingRoomExit(12), Exit(13);
+	WaitingRoomStatus(10), WaitingRoomChat(11), WaitingRoomExit(12), Exit(13), GameStart(14);
 	
 	
 	final int num;

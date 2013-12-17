@@ -47,6 +47,7 @@ public class ClientAction extends WindowAdapter implements ActionListener{
 		clientUI.hostname.setEditable(false);
 		clientUI.fldID.setEnabled(false);
 		clientUI.btnConnect.setEnabled(false);
+		RoomListPanel.getInstance().setClient(client);  //클라이언트를 new하고 나서 roomList의 setClient호출
 	}
 	
 	public void btnPersonalMsgAction() {

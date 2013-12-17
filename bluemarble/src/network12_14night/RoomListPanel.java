@@ -258,6 +258,7 @@ class RoomPanel extends JPanel implements MouseListener{
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		//roomListPanel = RoomListPanel.getInstance();
 		if(e.getSource() == joinB && isClient == true && roomInfo.getPlayerNum()<4) {
 			WaitingRoomInfo wri = new WaitingRoomInfo();
 			if(joinB.getText() == "게임 만들기") {
@@ -266,10 +267,11 @@ class RoomPanel extends JPanel implements MouseListener{
 			}else wri.setRoomName(new StringBuffer("참가"));			
 			wri.setRoomNum(roomInfo.getRoomNum());
 			ChatData cd = new ChatData(ChatType.Join, wri);
+			System.out.println(roomListPanel);
+			System.out.println(roomListPanel.client);
 			roomListPanel.client.send(cd);
 			//클라이언트의 경우 서버에 참가 여부를 보내고 Client에서 Success메세지를 받으면 대기실 시작
-		}
-		
+		}		
 	}
 
 	@Override

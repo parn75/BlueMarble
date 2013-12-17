@@ -199,6 +199,10 @@ public class WaitingRoomUI extends JFrame implements ActionListener, WindowListe
 			fldChat.setText("");
 		}if(e.getSource()==gameStartB) {	
 			System.out.println("게임이 시작됩니다.");
+			ChatData cd = new ChatData();
+			cd.setType(ChatType.GameStart);
+			client.send(cd);
+			//marble = new MabulEx();
 		}
 	}
 

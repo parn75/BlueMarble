@@ -26,6 +26,8 @@ class Client extends Thread {
 	ObjectOutputStream oos;
 	ObjectInputStream ois;
 
+	MabulEx marble;
+	
 	public Client(ClientUI clientUI, String hostname){		//객체 생성 및 배치
 		this.clientUI = clientUI;
 		this.hostname = hostname;
@@ -114,7 +116,7 @@ class Client extends Thread {
 			while((obj=ois.readObject())!=null) {	
 				
 				if(obj instanceof ChatData) {
-					ChatData cd = (ChatData)obj;					
+					ChatData cd = (ChatData)obj;			
 					try {
 						switch(cd.type) {							
 							case ConnectorList:	updateConnectorList(cd); //접속자 리스트 업데이트
@@ -125,9 +127,13 @@ class Client extends Thread {
 								break;
 							case Image: showImage(cd); //이미지 보여주기
 								break;
-							case Broadcast: clientUI.doc.insertString(clientUI.doc.getLength(), cd.from + (String)cd.data + "\n", clientUI.sc.getStyle("MainSytle"));
+							case Broadcast:
+								if(clientUI.isVisible()) clientUI.requestFocus();
+								clientUI.doc.insertString(clientUI.doc.getLength(), cd.from + (String)cd.data + "\n", clientUI.sc.getStyle("MainSytle"));
 								break;
-							case Whisper: clientUI.doc.insertString(clientUI.doc.getLength(), cd.from + (String)cd.data + "\n", clientUI.sc.getStyle("WhisperStyle"));
+							case Whisper: 
+								if(clientUI.isVisible()) clientUI.requestFocus();
+								clientUI.doc.insertString(clientUI.doc.getLength(), cd.from + (String)cd.data + "\n", clientUI.sc.getStyle("WhisperStyle"));
 								break;
 							case Join: joinWaitingRoom(cd); //대기실 참가									
 								break;
@@ -137,10 +143,19 @@ class Client extends Thread {
 								break;
 							case WaitingRoomStatus: //if(inWaitingRoom == true) updateWaitingRoomStatus(cd); //내가 접속해있는 대기실 상태 데이터
 								break;
-							case GameData: break; //게임 데이터를 위해 예약
-							case WaitingRoomChat:  //대기실 내부 채팅								
-								waitingRoom.doc.insertString(waitingRoom.doc.getLength(), cd.from + (String)cd.data + "\n", waitingRoom.sc.getStyle("MainSytle"));
-								waitingRoom.endScroll();
+							case GameData: /*marble.tp.xxx(cd.data);*/ break; //게임 데이터를 위해 예약
+							case WaitingRoomChat:  //대기실 내부 채팅	
+								if(waitingRoom.isVisible()) {
+									waitingRoom.requestFocus(); 
+									waitingRoom.doc.insertString(waitingRoom.doc.getLength(), cd.from + (String)cd.data + "\n", waitingRoom.sc.getStyle("MainSytle"));
+									waitingRoom.endScroll();
+								}else if(marble.isVisible()) {
+									marble.requestFocus();
+									marble.tp.chatView.append(cd.from + (String)cd.data + "\n");
+								}
+								break;
+							case GameStart: marble = new MabulEx(waitingRoom);
+											waitingRoom.setVisible(false);
 								break;
 							default:
 								break;					

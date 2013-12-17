@@ -132,14 +132,26 @@ class ServerThread extends Thread{
 		}
 	}	
 
-	private void waitingRoomChat(ChatData cd) { //대기실 안에서 채팅
-		System.out.println("대기실 채팅 보내기");
+	private void waitingRoomChat(ChatData cd) { //대기실 안에서 채팅		
 		ChatData rd = new ChatData(ChatType.WaitingRoomChat, cd.data);
 		String[] to = new String[roomList.roomList[thisRoomNum].getPlayerNames().length];
 		for(int i=0;i<roomList.roomList[thisRoomNum].getPlayerNames().length;i++)
 							to[i] = roomList.roomList[thisRoomNum].getPlayerNames()[i].toString();	
-		System.out.println(to[0] + to[1]);
-		rd.setTo(to); 
+		
+		rd.setTo(to);
+		rd.setFrom(this.getName() + ":");
+		server.send(rd);
+	}
+	
+	private void sendGameData(ChatData cd) { //대기실 안에 있는 사람들에게 게임 데이터 전송		
+		ChatData rd = new ChatData();
+		rd.setType(ChatType.GameData);
+		rd.setData(cd.data);
+		String[] to = new String[roomList.roomList[thisRoomNum].getPlayerNames().length];
+		for(int i=0;i<roomList.roomList[thisRoomNum].getPlayerNames().length;i++)
+							to[i] = roomList.roomList[thisRoomNum].getPlayerNames()[i].toString();	
+		
+		rd.setTo(to);
 		rd.setFrom(this.getName() + ":");
 		server.send(rd);
 	}
@@ -155,8 +167,7 @@ class ServerThread extends Thread{
 		ChatData cd = new ChatData(ChatType.RoomStatus, wrs);			
 		if(server.clientMap.size()>0) {
 			server.broadcast(cd);		
-		}
-		
+		}		
 	}
 	
 	public void exitProgram() {
@@ -164,6 +175,18 @@ class ServerThread extends Thread{
 		server.broadcast(new ChatData(ChatType.Broadcast, "Server: ", "[" + this.getName() + "]님이 나가셨습니다."));
 		server.sendConnectorList();
 		System.out.println(socket.getInetAddress() + "의 연결이 종료되었습니다.");
+	}
+	
+	public void gameStart(ChatData cd) {
+		ChatData rd = new ChatData();
+		rd.setType(ChatType.GameStart);		
+		String[] to = new String[roomList.roomList[thisRoomNum].getPlayerNames().length];
+		for(int i=0;i<roomList.roomList[thisRoomNum].getPlayerNames().length;i++)
+							to[i] = roomList.roomList[thisRoomNum].getPlayerNames()[i].toString();	
+		
+		rd.setTo(to);
+		rd.setFrom(this.getName() + ":");
+		server.send(rd);
 	}
 
 	//클라이언트로부터 메세지를 받는 쓰레드
@@ -185,6 +208,8 @@ class ServerThread extends Thread{
 				case WaitingRoomChat: waitingRoomChat(cd); break; //대기실 대화
 				case WaitingRoomExit: waitingRoomExit(cd); break; //대기실 나감
 				case Exit: exitProgram(); break;
+				case GameData: sendGameData(cd); break;
+				case GameStart: gameStart(cd); break;
 				default:
 					break;
 

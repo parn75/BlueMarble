@@ -24,7 +24,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleContext;
 
 public class ClientUI extends JFrame{
-	public boolean debug = true;
+	public boolean debug = false;
 	private final int XSIZE = 500, YSIZE = 550;
 	private static final long serialVersionUID = -8584629477552591872L;
 	
