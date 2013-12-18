@@ -24,7 +24,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleContext;
 
 public class ServerUI extends JFrame{
-	boolean debug = true;
+	boolean debug = true; 
 	private static final long serialVersionUID = -5472820133041236799L;
 	JTextField hostInfo;
 	JButton btnSvrStart = new JButton("Server Start");

@@ -70,7 +70,7 @@ public class ClientUI extends JFrame{
 		fldID.addActionListener(clientAction);
 		fldChat.addActionListener(clientAction);
 		this.addWindowListener(clientAction);
-		roomList.setClient(clientAction.client);
+		
 	}
 	
 	public void endScroll() {  //Scroll을 가장 아래로 내리기 위한 메소드		

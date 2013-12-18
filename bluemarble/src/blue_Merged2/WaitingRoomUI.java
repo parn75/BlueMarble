@@ -81,7 +81,7 @@ public class WaitingRoomUI extends JFrame implements ActionListener, WindowListe
 	}
 	
 	public BufferedImage drawRoom(String roomName, int firstColor, int medianColor) {
-		System.out.println(roomName+"의 length는 " + roomName.length() + "입니다.");
+		//System.out.println(roomName+"의 length는 " + roomName.length() + "입니다.");
 		int fontSize = 30;
 		int roomHeight = 100;
 		BufferedImage bi = new BufferedImage(XSIZE, roomHeight, BufferedImage.TYPE_INT_ARGB); 

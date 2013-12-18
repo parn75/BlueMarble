@@ -13,14 +13,16 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 
-class Purchase extends JFrame {
+class Purchase extends JPanel {
 // 건물구입
 	City c;
 	private JRadioButton b1, b2, b3, b4;
 	private Boolean[] buyType = { false, false, false, false };
 	private JTextArea lb = new JTextArea();
 	private int totPrice;
-	public Purchase(String cityName , int price) {
+	String cityName=null;
+	int price=0;
+	public Purchase() {
 		setSize(150, 200);
 		// 라디오 버튼 초기화
 		b1 = new JRadioButton("땅");
@@ -67,22 +69,18 @@ class Purchase extends JFrame {
 					System.out.println(TablePanel.control.playerData.get(TablePanel.control.getIAM()).thisXY);
 					
 					TablePanel.control.playerData.get(TablePanel.control.getIAM()).money -= totPrice;
-				} else if (TablePanel.control.playerData.get(TablePanel.control.getIAM()).money < totPrice)
+				
+				} else if (TablePanel.control.playerData.get(TablePanel.control.getIAM()).money < totPrice){
 					JOptionPane.showMessageDialog(getParent(), "돈이 부족합니다.",
 							"돈 부족.", JOptionPane.WARNING_MESSAGE);
-				else
+				 TablePanel.control.turnOver();
+			}else
 					JOptionPane.showMessageDialog(getParent(), "건설할 것을 선택하시길",
 							"하나는 체크해야한다.", JOptionPane.WARNING_MESSAGE);
-				//System.out.println("가격" + totPrice);
-				//System.out.println("번호" + TablePanel.userNum);
-				//System.out.println(TablePanel.ply.get(TablePanel.userNum).name);
-				//System.out.println("보유돈" + TablePanel.ply.get(TablePanel.userNum).money);
-				//System.out.println(TablePanel.cityMap.get(c.getCityName()).getCityName());
-				//if (TablePanel.userNum < 1)
-				//	TablePanel.userNum++;
-				//else
+				 TablePanel.control.turnOver();
 				TablePanel.control.GAME_CONTROL(100);
 				TablePanel.trunOver = false;
+				TablePanel.f=false;
 				setVisible(false);
 			}
 
@@ -90,39 +88,7 @@ class Purchase extends JFrame {
 		add("North", lb);
 		add("Center", centerPanel);
 		add("South", btn);
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowActivated(WindowEvent e) {
-				// TODO Auto-generated method stub
-				super.windowActivated(e);
-				if (TablePanel.control.playerData != null)
-					c = (City) TablePanel.control.cityMap.get(TablePanel.control.getCityNameList()[TablePanel.control.playerData.get(TablePanel.control.getIAM()).thisXY]);
-				totPrice = c.getPrice()[0];
-				for (int i = 0; i < 4; i++)
-					buyType[i] = false;
-				buyType[0] = true;
-				b1.setSelected(true);
-				b2.setSelected(false);
-				b3.setSelected(false);
-				b4.setSelected(false);
-				repaint();
-			}
-
-			@Override
-			public void windowClosing(WindowEvent e) {
-				// TODO Auto-generated method stub
-				super.windowClosing(e);
-				setVisible(false);
-				//if (TablePanel.userNum < 1)
-				//	TablePanel.userNum++;
-				//else
-				
-					TablePanel.control.GAME_CONTROL(100);
-				TablePanel.trunOver = false;
-
-			}
-
-		});
+	
 		b1.addActionListener(new ActionListener() {
 
 			@Override
@@ -196,6 +162,13 @@ class Purchase extends JFrame {
 				lb.setText("도시이름 " + c.getCityName() + "\n건물 가격 :" + totPrice);
 			}
 		});
+	}
+	
+	public void setCityData(City c,String cityName , int price){
+		this.c=c;
+		this.cityName=cityName;
+		this.price=price;
+		lb.setText("도시이름 " + cityName + "\n건물 가격 :" + price);
 	}
 
 }// 구매 클래스끝

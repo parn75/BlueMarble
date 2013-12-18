@@ -128,21 +128,15 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 	private JScrollPane chetScroll;
 	private JSplitPane chetResize;
 	private JLabel chetDummyLB = new JLabel();
-	private Purchase inCity;
+	private JPanel btPanel = new JPanel();
+	private Purchase inCity=new Purchase();
 	private String currentUser = null;
-	/*
-	 * //스테틱을 안쓰고 던져줄 방법을 생각 public static int userNum = 0; public static
-	 * ArrayList<Player> ply = new ArrayList<Player>(); public static
-	 * HashMap<Object, City> cityMap = new HashMap<Object, City>(); public
-	 * static final String[] cityNameList = {"출발지","방콕","마카오","베이징","독도","타이페이",
-	 * "두바이"
-	 * ,"카이로","무인도","발리","도쿄","하와이","시드니","상파울로","찬스카드","퀘벡","복지기구","프라하","푸켓",
-	 * "베를린","모스코바","찬스카드","로마","제네바","세계여행","타이티","파리","찬스카드","런던","서울","뉴욕"};
-	 */
+
+	
 	public static ArrayList<Building> buildingList = new ArrayList<Building>();
 	public static Boolean trunOver = false;
 	private int dice1, dice2;
-	private Boolean f = false;
+	public static Boolean f = false;
 	Player dPlayer;
 	WaitingRoomUI waitingRoom;
 
@@ -160,7 +154,7 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 		}
 
 		control.setNickName(names);
-		JOptionPane.showMessageDialog(null, waitingRoom.client.getMyName());
+		//JOptionPane.showMessageDialog(null, waitingRoom.client.getMyName());
 		control.setIAM(waitingRoom.client.getMyName());// 클라이언트 자신의 이름
 		System.out.println("자신" + waitingRoom.client.getMyName());
 		System.out.println("체크" + control.getNickName()[0]);
@@ -189,6 +183,11 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 		chetResize.addMouseListener(this);
 		addMouseListener(this);
 		// add(chetScroll);
+		
+		inCity.setBounds(510,200, 200, 250);
+		inCity.addMouseListener(this);
+		add(inCity);
+		inCity.setVisible(false);
 		add(chatInput);
 		add(chetResize);
 		
@@ -234,6 +233,7 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 		g2.drawImage(backGroundImg, 0, 0, 1240, 760, this);
 		//g2.drawImage(diceBtn, 555, 290, this);
 		
+		
 		if (control.getIAM().equals(control.getNickName()[control.getTurnCP()]) && trunOver == false ) g2.drawImage(diceBtn, 555, 290, this);
 
 		for (int i = 0; i < control.getNickName().length; i++) {
@@ -260,14 +260,7 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 					control.playerData.get(control.getNickName()[i]).getX(),
 					control.playerData.get(control.getNickName()[i]).getY());
 		}
-		g2.setColor(Color.white);
-		for (int i = 0; i < control.getNickName().length; i++) {
-			if (!control.getNickName()[i].equals("None"))
-				g2.drawString(control.getNickName()[i]
-						+ " 가진돈 : "
-						+ control.playerData.get(control.getNickName()[i])
-								.getMoney(), profileXY[i][0], profileXY[i][1]);
-		}
+
 		
 		g2.drawImage(drawRoom(control.getNickName()[0], control.playerData.get(control.getNickName()[0]).getMoney(),
 				100, 100), 20, 20, this);
@@ -329,7 +322,7 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
+	 	// TODO Auto-generated method stub
 	Rectangle mouseEventRect = new Rectangle(e.getX(),
 				e.getY(), 10, 10);
 	System.out.println("버튼반응 현제턴 "+control.getNickName()[control.getTurnCP()]+"자신"+control.getIAM()+"마우스리스너 온"+trunOver);
@@ -382,6 +375,7 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 						
 					
 				if(control.event==true){
+					System.out.println("여까진옴");
 				animation();
 				f=true;
 				}
@@ -404,6 +398,7 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 	public void animation() {
 		// if(ply.size()!=0)
 
+		System.out.println("여까진옴2");
 		dPlayer = (Player) control.playerData.get
 				(control.getNickName()[control.getTurnCP()]); // 지금 플레이중인
 		System.out.println("턴"+control.getTurnCP()+"/"+control.event+"/가진 주사위값"+dPlayer.userDics);
@@ -474,13 +469,17 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 				if (c != null) {
 					int[] p = c.getPrice();
 					System.out.println(p[0] + "/" + p[1]);
-					inCity = new Purchase(c.getCityName(), p[0]);
+					inCity.setCityData(c,c.getCityName(), p[0]);
 
 				}
+				System.out.println("지금 도시이름"+c.getCityName());
+				//inCity.setCityData(c,c.getCityName(), 5000);
 				System.out.println("구매");
-				//inCity.setVisible(true);
-				f=false;
-				trunOver = false;
+				inCity.updateUI();
+				inCity.setVisible(true);
+				//control.GAME_CONTROL(100);
+				//f=false;
+				//trunOver = false;
 			} else if (control.playerData.get(control.getIAM()).money < 0) {
 				System.exit(0);
 			} else if (c != null
@@ -501,6 +500,7 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 								+ c.getPrice()[i]);
 					}
 					System.out.println(tMoney);
+					
 				}
 				System.out.println("걸림3");
 				control.playerData.get(control.getIAM()).money -= tMoney * 2; // 현제유저의
@@ -516,9 +516,11 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 				// userNum++;
 				// else
 				// userNum = 0;
+				control.turnOver();
 				control.GAME_CONTROL(100);
 				trunOver = false;
 				f=false;
+				
 
 			} else {
 				// if (userNum < 1)
@@ -526,6 +528,7 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 				// else
 				// userNum = 0;
 				f=false;
+				control.turnOver();
 				control.GAME_CONTROL(100);
 				trunOver = false;
 				
@@ -534,4 +537,5 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 		}
 	}
 
+	 
 }

@@ -14,7 +14,7 @@ import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.text.BadLocationException;
-
+ 
 public class ClientAction extends WindowAdapter implements ActionListener{
 	ClientUI clientUI;
 	Client client;
@@ -47,6 +47,7 @@ public class ClientAction extends WindowAdapter implements ActionListener{
 		clientUI.hostname.setEditable(false);
 		clientUI.fldID.setEnabled(false);
 		clientUI.btnConnect.setEnabled(false);
+		RoomListPanel.getInstance().setClient(client);
 	}
 	
 	public void btnPersonalMsgAction() {
@@ -140,6 +141,7 @@ public class ClientAction extends WindowAdapter implements ActionListener{
 	
 	@Override
 	public void windowClosing(WindowEvent e) {
+		if(client==null)System.exit(0);
 		ChatData cd = new ChatData();
 		cd.setType(ChatType.Exit);
 		client.send(cd);

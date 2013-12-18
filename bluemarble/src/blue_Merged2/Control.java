@@ -58,21 +58,22 @@ public class Control {
 			System.out.println(gameTurnCP+" 바퀴째 ____"+nickName[turnCP]+"플레이어의  턴 <<_________ \n\n");
 */			
 
-			ChatData cd = new ChatData();
-			cd.setType(ChatType.GameData);
-			System.out.println("보낼때 "+event);
-			event=true;
-			System.out.println("보낼때 2"+event);
-			GameData gd= new GameData(cityMap, playerData,event,dicetot);
-			cd.setData(gd);
-			System.out.println("불렌"+gd.event);
-			System.out.println(gd.playerData.toString());
-			System.out.println(gd.playerData.toString());
-			System.out.println("보낼다이스:"+gd.playerData.get(IAM).userDics);
-			 event=false; 
-			 dicetot=0;
-			 if(IAM.equals(nickName[turnCP]))
-			 waitingRoom.client.send(cd);
+//			ChatData cd = new ChatData();
+//			cd.setType(ChatType.GameData);
+//			System.out.println("보낼때 "+event);
+//			event=true;
+//			System.out.println("보낼때 2"+event);
+//			GameData gd= new GameData(cityMap, playerData,event,dicetot);
+//			cd.setData(gd);
+//			System.out.println("불렌"+gd.event);
+//			System.out.println(gd.playerData.toString());
+//			System.out.println(gd.playerData.toString());
+//			System.out.println("보낼다이스:"+gd.playerData.get(IAM).userDics);
+//			 event=false; 
+//			 dicetot=0;
+//			 if(IAM.equals(nickName[turnCP]))
+//			 waitingRoom.client.send(cd);
+	
 				
 			break;
 		case 2: // 통행료 부과 
@@ -120,6 +121,11 @@ public class Control {
 		for (int i = 0; i < cityName.length; i++) {
 			cityMap.put(cityName[i], new City(i + 1, priceInt, cityName[i]));
 			cityNameList[i] = cityName[i];
+			System.out.println("/////////////////////////////////");
+			System.out.println("/////////////////////////////////");
+			System.out.println("/////////////////////////////////");
+			System.out.println("/////////////////////////////////");
+			System.out.println("가격"+priceInt[0]);
 		}
 		
 		// City HashMap 개별 초기 출력값
@@ -350,6 +356,23 @@ public class Control {
 	}
 	
 
-
+	public void turnOver(){
+		ChatData cd = new ChatData();
+		cd.setType(ChatType.GameData);
+		System.out.println("보낼때 "+event);
+		event=true;
+		System.out.println("보낼때 2"+event);
+		GameData gd= new GameData(cityMap, playerData,event,dicetot);
+		cd.setData(gd);
+		System.out.println("불렌"+gd.event);
+		System.out.println(gd.playerData.toString());
+		System.out.println(gd.playerData.toString());
+		System.out.println("보낼다이스:"+gd.playerData.get(IAM).userDics);
+		event=false; 
+		 dicetot=0;
+		 System.out.println("구매 정보 턴"+turnCP+"현제턴 닉"+nickName[turnCP]);
+		 if(IAM.equals(nickName[turnCP]))
+		 waitingRoom.client.send(cd);
+	}
 } // end class
 
