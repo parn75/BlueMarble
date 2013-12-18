@@ -9,11 +9,8 @@ public class Player  implements Serializable{
 	// x, y, 진행된 배열의 값(math.random형태? 
 	// 차후에는 주사위를 굴렸는지 아닌지를 Server로 .. ), 플레이어의 소지금. 
 	public int userTurn;
-	enum status {
-		WAIT, RUN, BROKE, DOUBLE;   
-		// 플레이어가 현제 움직이고 있는지, 대기 상태인지, 플레이 불가 상태인지 판단, 주사위더블인지 등의 이벤트 판단값.
-	};
 	public String name;  // 내가 누군지 먼저 알아야 되니 DB에서 로그인값을 바탕으로 가지고 오는게 맞지 않을까?
+	private int userState;//유저 상태 체크
 	private Boolean host; // 플레이어가 게임의 호스트인지 아닌지를 판단하는 값.
 	
 	public Player(String name, Boolean host) {
@@ -99,6 +96,16 @@ public class Player  implements Serializable{
 
 	public void setHost(Boolean host) {
 		this.host = host;
+	}
+	 
+	
+
+	public int getUserState() {
+		return userState;
+	}
+
+	public void setUserState(int userState) {
+		this.userState = userState;
 	}
 
 	@Override

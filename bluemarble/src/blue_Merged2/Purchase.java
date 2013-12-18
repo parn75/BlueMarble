@@ -3,11 +3,8 @@ package blue_Merged2;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -69,6 +66,7 @@ class Purchase extends JPanel {
 					System.out.println(TablePanel.control.playerData.get(TablePanel.control.getIAM()).thisXY);
 					
 					TablePanel.control.playerData.get(TablePanel.control.getIAM()).money -= totPrice;
+					SoundEffect.CONSTRUCT.play();
 				
 				} else if (TablePanel.control.playerData.get(TablePanel.control.getIAM()).money < totPrice){
 					JOptionPane.showMessageDialog(getParent(), "돈이 부족합니다.",

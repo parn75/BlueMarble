@@ -37,10 +37,15 @@ public class City implements Serializable{
 
 	public Boolean[] getBuildList() {
 		return buildList;
-	}
+	} 
  
 	public void setBuildList(Boolean[] buildList) {
 		this.buildList = buildList;
+	}
+	 
+
+	public int getCityNum() {
+		return cityNum;
 	}
 
 	@Override

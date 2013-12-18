@@ -39,6 +39,16 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 			"./img/diceon.png");
 	protected final Image building = Toolkit.getDefaultToolkit().getImage(
 			"./img/city.png");
+	// 아직은 사용하지 않는다.
+	protected final Image win = Toolkit.getDefaultToolkit().getImage(
+			"./img/winner.png");
+	protected final Image lose = Toolkit.getDefaultToolkit().getImage(
+			"./img/lose.png");
+	protected final Image chanceView = Toolkit.getDefaultToolkit().getImage(
+			"./img/");
+	protected final Image eventEffect = Toolkit.getDefaultToolkit().getImage(
+			"./img/");
+
 	protected final Rectangle BTNRECT = new Rectangle(555, 290, 200, 200);
 	protected final int[][] mapXY = { { 530, 570 }, { 480, 528 }, { 425, 485 },
 			{ 365, 445 }, { 315, 405 }, { 265, 365 }, { 215, 325 },
@@ -49,26 +59,29 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 			{ 1005, 352 }, { 940, 390 }, { 870, 420 }, { 805, 455 },
 			{ 748, 490 }, { 690, 515 }, { 630, 550 } };
 
-	protected final int[][] buildingXY = {
+	protected final int[][] buildingXY = { { 0, 0 }, { 0, 0 }, { 0, 0 },
 			{ mapXY[1][0] + 35, mapXY[1][1] - 15 },
 			{ mapXY[1][0] + 55, mapXY[1][1] },
-			{ mapXY[1][0] + 75, mapXY[1][1] + 15 },
-			{ mapXY[3][0] + 40, mapXY[3][1] - 12 },
+			{ mapXY[1][0] + 75, mapXY[1][1] + 15 }, { 0, 0 }, { 0, 0 },
+			{ 0, 0 }, { mapXY[3][0] + 40, mapXY[3][1] - 12 },
 			{ mapXY[3][0] + 57, mapXY[3][1] },
 			{ mapXY[3][0] + 75, mapXY[3][1] + 10 },
+
 			{ mapXY[4][0] + 33, mapXY[4][1] - 16 },
 			{ mapXY[4][0] + 52, mapXY[4][1] },
 			{ mapXY[4][0] + 73, mapXY[4][1] + 13 },
 			{ mapXY[5][0] + 33, mapXY[5][1] - 15 },
 			{ mapXY[5][0] + 48, mapXY[5][1] },
 			{ mapXY[5][0] + 65, mapXY[5][1] + 12 },
+
 			{ mapXY[6][0] + 35, mapXY[6][1] - 10 },
 			{ mapXY[6][0] + 50, mapXY[6][1] + 5 },
 			{ mapXY[6][0] + 65, mapXY[6][1] + 15 },
+
 			{ mapXY[7][0] + 40, mapXY[7][1] },
 			{ mapXY[7][0] + 55, mapXY[7][1] + 10 },
-			{ mapXY[7][0] + 70, mapXY[7][1] + 20 },
-			{ mapXY[9][0] - 30, mapXY[9][1] + 5 },
+			{ mapXY[7][0] + 70, mapXY[7][1] + 20 }, { 0, 0 }, { 0, 0 },
+			{ 0, 0 }, { mapXY[9][0] - 30, mapXY[9][1] + 5 },
 			{ mapXY[9][0] - 15, mapXY[9][1] - 2 },
 			{ mapXY[9][0], mapXY[9][1] - 10 },
 			{ mapXY[10][0] - 30, mapXY[10][1] + 5 },
@@ -82,11 +95,11 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 			{ mapXY[12][0] + 7, mapXY[12][1] - 12 },
 			{ mapXY[13][0] - 28, mapXY[13][1] + 6 },
 			{ mapXY[13][0] - 11, mapXY[13][1] - 3 },
-			{ mapXY[13][0] + 5, mapXY[13][1] - 10 },
-			{ mapXY[15][0] - 30, mapXY[15][1] + 6 },
+			{ mapXY[13][0] + 5, mapXY[13][1] - 10 }, { 0, 0 }, { 0, 0 },
+			{ 0, 0 }, { mapXY[15][0] - 30, mapXY[15][1] + 6 },
 			{ mapXY[15][0] - 14, mapXY[15][1] - 1 },
-			{ mapXY[15][0] + 1, mapXY[15][1] - 7 },
-			{ mapXY[17][0] + 42, mapXY[17][1] - 6 },
+			{ mapXY[15][0] + 1, mapXY[15][1] - 7 }, { 0, 0 }, { 0, 0 },
+			{ 0, 0 }, { mapXY[17][0] + 42, mapXY[17][1] - 6 },
 			{ mapXY[17][0] + 58, mapXY[17][1] + 3 },
 			{ mapXY[17][0] + 75, mapXY[17][1] + 12 },
 			{ mapXY[18][0] + 42, mapXY[18][1] - 6 },
@@ -97,20 +110,20 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 			{ mapXY[19][0] + 75, mapXY[19][1] + 9 },
 			{ mapXY[20][0] + 38, mapXY[20][1] - 10 },
 			{ mapXY[20][0] + 56, mapXY[20][1] - 1 },
-			{ mapXY[20][0] + 75, mapXY[20][1] + 9 },
-			{ mapXY[22][0] + 33, mapXY[22][1] - 10 },
+			{ mapXY[20][0] + 75, mapXY[20][1] + 9 }, { 0, 0 }, { 0, 0 },
+			{ 0, 0 }, { mapXY[22][0] + 33, mapXY[22][1] - 10 },
 			{ mapXY[22][0] + 56, mapXY[22][1] + 3 },
 			{ mapXY[22][0] + 77, mapXY[22][1] + 15 },
 			{ mapXY[23][0] + 33, mapXY[23][1] - 10 },
 			{ mapXY[23][0] + 56, mapXY[23][1] + 3 },
-			{ mapXY[23][0] + 77, mapXY[23][1] + 15 },
-			{ mapXY[25][0] - 45, mapXY[25][1] + 6 },
+			{ mapXY[23][0] + 77, mapXY[23][1] + 15 }, { 0, 0 }, { 0, 0 },
+			{ 0, 0 }, { mapXY[25][0] - 45, mapXY[25][1] + 6 },
 			{ mapXY[25][0] - 23, mapXY[25][1] - 6 },
 			{ mapXY[25][0] - 3, mapXY[25][1] - 18 },
 			{ mapXY[26][0] - 40, mapXY[26][1] + 2 },
 			{ mapXY[26][0] - 21, mapXY[26][1] - 8 },
-			{ mapXY[26][0] - 3, mapXY[26][1] - 18 },
-			{ mapXY[28][0] - 40, mapXY[28][1] + 3 },
+			{ mapXY[26][0] - 3, mapXY[26][1] - 18 }, { 0, 0 }, { 0, 0 },
+			{ 0, 0 }, { mapXY[28][0] - 40, mapXY[28][1] + 3 },
 			{ mapXY[28][0] - 21, mapXY[28][1] - 7 },
 			{ mapXY[28][0] - 3, mapXY[28][1] - 17 },
 			{ mapXY[30][0] - 39, mapXY[30][1] + 2 },
@@ -129,10 +142,10 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 	private JSplitPane chetResize;
 	private JLabel chetDummyLB = new JLabel();
 	private JPanel btPanel = new JPanel();
-	private Purchase inCity=new Purchase();
+	private Purchase inCity = new Purchase();
 	private String currentUser = null;
+	private Boolean userlive = true;
 
-	
 	public static ArrayList<Building> buildingList = new ArrayList<Building>();
 	public static Boolean trunOver = false;
 	private int dice1, dice2;
@@ -154,7 +167,7 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 		}
 
 		control.setNickName(names);
-		//JOptionPane.showMessageDialog(null, waitingRoom.client.getMyName());
+		// JOptionPane.showMessageDialog(null, waitingRoom.client.getMyName());
 		control.setIAM(waitingRoom.client.getMyName());// 클라이언트 자신의 이름
 		System.out.println("자신" + waitingRoom.client.getMyName());
 		System.out.println("체크" + control.getNickName()[0]);
@@ -178,19 +191,18 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 		chetResize.setBounds(310, 350, 620, 360);
 		chetResize.setOpaque(false);
 		chetResize.setBorder(null);
-		
+
 		bottomPanel.addMouseListener(this);
 		chetResize.addMouseListener(this);
 		addMouseListener(this);
 		// add(chetScroll);
-		
-		inCity.setBounds(510,200, 200, 250);
+
+		inCity.setBounds(510, 200, 200, 250);
 		inCity.addMouseListener(this);
 		add(inCity);
 		inCity.setVisible(false);
 		add(chatInput);
 		add(chetResize);
-		
 
 	}
 
@@ -200,29 +212,31 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 	 * cityMap.put(cityNameList[i], new City(i + 1, priceInt, cityNameList[i]));
 	 * } }
 	 */
-	public BufferedImage drawRoom(String playerName,int money, int firstColor, int medianColor) {		
+	public BufferedImage drawRoom(String playerName, int money, int firstColor,
+			int medianColor) {
 		int roomX = 200, roomY = 100;
-		int fontSize = 30;		
-		BufferedImage bi = new BufferedImage(roomX, roomY, BufferedImage.TYPE_INT_ARGB); 
+		int fontSize = 30;
+		BufferedImage bi = new BufferedImage(roomX, roomY,
+				BufferedImage.TYPE_INT_ARGB);
 		Graphics2D ig2 = bi.createGraphics();
-		int c = 255/roomY;
-		for(int i=0;i<=roomY;i++) {			
-			Color color = new Color(c*i,firstColor , medianColor);
+		int c = 255 / roomY;
+		for (int i = 0; i <= roomY; i++) {
+			Color color = new Color(c * i, firstColor, medianColor);
 			ig2.setPaint(color);
 			ig2.drawLine(0, i, roomX, i);
 		}
 
-	    ig2.setPaint(Color.black);
-	    Font f = new Font("굴림", Font.BOLD, fontSize);
-	    ig2.setFont(f);
-	    int fx = (roomX - fontSize*playerName.length()/2)/2;
-	    ig2.drawString(playerName, 30, 40);
-	    f = new Font("굴림", Font.BOLD, 15);
-	    ig2.setFont(f);
-	    ig2.drawString("소유금: " + money, 30, 80);
-	    return bi;
+		ig2.setPaint(Color.black);
+		Font f = new Font("굴림", Font.BOLD, fontSize);
+		ig2.setFont(f);
+		int fx = (roomX - fontSize * playerName.length() / 2) / 2;
+		ig2.drawString(playerName, 30, 40);
+		f = new Font("굴림", Font.BOLD, 15);
+		ig2.setFont(f);
+		ig2.drawString("소유금: " + money, 30, 80);
+		return bi;
 	}
-	
+
 	@Override
 	protected void paintComponent(Graphics g) {
 		// TODO Auto-generated method stub
@@ -231,10 +245,11 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 				BufferedImage.TYPE_INT_ARGB);
 		Graphics g2 = bi.getGraphics();
 		g2.drawImage(backGroundImg, 0, 0, 1240, 760, this);
-		//g2.drawImage(diceBtn, 555, 290, this);
-		
-		
-		if (control.getIAM().equals(control.getNickName()[control.getTurnCP()]) && trunOver == false ) g2.drawImage(diceBtn, 555, 290, this);
+		// g2.drawImage(diceBtn, 555, 290, this);
+
+		if (control.getIAM().equals(control.getNickName()[control.getTurnCP()])
+				&& trunOver == false && userlive == true)
+			g2.drawImage(diceBtn, 555, 290, this);
 
 		for (int i = 0; i < control.getNickName().length; i++) {
 			if (!control.getNickName()[i].equals("None"))
@@ -245,38 +260,68 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 						this);
 		}
 		g2.setColor(new Color(0));
-		for (Building t : buildingList) {
-			for (int j = 0; j < t.buildCnt; j++) {
-				g2.drawImage(building, mapXY[t.thisXY][0] + j * 5,
-						mapXY[t.thisXY][1], this);
-			}
-		}
-		for(int i=0; i<control.turnMax;i++){
-		if(control.getNickName()[i].equals(control.getIAM()))
-			g2.drawString("자신"+control.getIAM(),control.playerData.get(control.getNickName()[i]).getX(),
-					control.playerData.get(control.getNickName()[i]).getY());
-		else
-			g2.drawString((i+1)+"피", 
-					control.playerData.get(control.getNickName()[i]).getX(),
-					control.playerData.get(control.getNickName()[i]).getY());
+
+		for (int i = 0; i < control.turnMax; i++) {
+			if (control.getNickName()[i].equals(control.getIAM()))
+				g2.drawString(
+						"자신" + control.getIAM(),
+						control.playerData.get(control.getNickName()[i]).getX(),
+						control.playerData.get(control.getNickName()[i]).getY());
+			else
+				g2.drawString(
+						(i + 1) + "피",
+						control.playerData.get(control.getNickName()[i]).getX(),
+						control.playerData.get(control.getNickName()[i]).getY());
 		}
 
-		
-		g2.drawImage(drawRoom(control.getNickName()[0], control.playerData.get(control.getNickName()[0]).getMoney(),
-				100, 100), 20, 20, this);
-		g2.drawImage(drawRoom(control.getNickName()[1], control.playerData.get(control.getNickName()[0]).getMoney(),
-				50, 100), 1000, 20, this);
-		g2.drawImage(drawRoom(control.getNickName()[2], control.playerData.get(control.getNickName()[0]).getMoney(),
-				150, 100), 20, 600, this);
-		g2.drawImage(drawRoom(control.getNickName()[3], control.playerData.get(control.getNickName()[0]).getMoney(),
-				200, 100), 1000, 600, this);
+		g2.drawImage(
+				drawRoom(control.getNickName()[0],
+						control.playerData.get(control.getNickName()[0])
+								.getMoney(), 100, 100), 20, 20, this);
+		g2.drawImage(
+				drawRoom(control.getNickName()[1],
+						control.playerData.get(control.getNickName()[0])
+								.getMoney(), 50, 100), 1000, 20, this);
+		g2.drawImage(
+				drawRoom(control.getNickName()[2],
+						control.playerData.get(control.getNickName()[0])
+								.getMoney(), 150, 100), 20, 600, this);
+		g2.drawImage(
+				drawRoom(control.getNickName()[3],
+						control.playerData.get(control.getNickName()[0])
+								.getMoney(), 200, 100), 1000, 600, this);
 		// 좌표위치 테스트
-		// for(int i=0; i<mapXY.length; i++){
-		//	 g2.setColor(Color.black);
-		// g2.drawRect(mapXY[i][0], mapXY[i][1],50, 50);
+		// for (int i = 0; i < buildingXY.length; i++) {
+		// g2.setColor(Color.black);
+		// g2.drawRect(buildingXY[i][0], buildingXY[i][1], 10, 10);
 		// }
+		// 건물건설
+		for (Building t : buildingList) {
+			int dXY = t.thisXY * 3;
+			for (int j = 1; j < t.buildCnt; j++) {
+				if (buildingXY[t.thisXY * 3 + (j - 1)][0] != 0
+						&& buildingXY[t.thisXY * 3 + (j - 1)][1] != 0)
+					g2.drawImage(building,
+							buildingXY[t.thisXY * 3 + (j - 1)][0],
+							buildingXY[t.thisXY * 3 + (j - 1)][1], this);
+				System.out.println("판 주소" + t.thisXY);
+				repaint();
+			}
+		}
+
+		if (control.playerData.get(control.getIAM()).getUserState() == 10) {// 주금
+			userlive = false;
+			g2.drawImage(lose, 550, 290, this);
+		} else if (control.playerData.get(control.getIAM()).getUserState() == 11) {// 이김
+			userlive = false;
+			g2.drawImage(win, 450, 290, this);
+		} else if (control.playerData.get(control.getIAM()).getUserState() == 1) {// 세금
+			userlive = false;
+			g2.drawImage(win, control.playerData.get(control.getIAM()).getX(),
+					control.playerData.get(control.getIAM()).getY(), this);
+		}
 		g.drawImage(bi, 0, 0, this);
-		
+
 	}
 
 	public void TextSetting() {
@@ -322,18 +367,25 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-	 	// TODO Auto-generated method stub
-	Rectangle mouseEventRect = new Rectangle(e.getX(),
-				e.getY(), 10, 10);
-	System.out.println("버튼반응 현제턴 "+control.getNickName()[control.getTurnCP()]+"자신"+control.getIAM()+"마우스리스너 온"+trunOver);
-		if (trunOver!=true&&control.getIAM().equals(control.getNickName()[control.getTurnCP()])
-				&&mouseEventRect.intersects(BTNRECT)) {
+		// TODO Auto-generated method stub
+		Rectangle mouseEventRect = new Rectangle(e.getX(), e.getY(), 10, 10);
+		System.out.println("버튼반응 현제턴 "
+				+ control.getNickName()[control.getTurnCP()] + "자신"
+				+ control.getIAM() + "마우스리스너 온" + trunOver);
+		if (userlive == true
+				&& trunOver != true
+				&& control.getIAM().equals(
+						control.getNickName()[control.getTurnCP()])
+				&& mouseEventRect.intersects(BTNRECT)) {
 			System.out.println("눌림");
-			control.event=true;
+			control.event = true;
 			f = true;
 			trunOver = true;
-			System.out.println("나의 아이디:" + control.getIAM()+"턴값"+control.getTurnCP()
-					+"턴인사람 이름"+control.getNickName()[control.getTurnCP()]);
+			System.out.println("나의 아이디:" + control.getIAM() + "턴값"
+					+ control.getTurnCP() + "턴인사람 이름"
+					+ control.getNickName()[control.getTurnCP()]);
+			control.playerData.get(control.getIAM()).setUserState(2);
+			SoundEffect.DICE.play();
 		}
 	}
 
@@ -367,25 +419,24 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 		try {
 			while (!Thread.currentThread().isInterrupted()) {
 				// 에니메이션용 쓰레드
-				//repaint();
+				// repaint();
 				currentUser = control.currentUserName();
 				if (chatInput != null && trunOver != true)
-					//chatInput.requestFocus();
+					// chatInput.requestFocus();
 					synchronized (this) {
-						
-					
-				if(control.event==true){
-					System.out.println("여까진옴");
-				animation();
-				f=true;
-				}
+
+						if (control.event == true) {
+							System.out.println("여까진옴");
+							animation();
+							f = true;
+
+						}
 					}
-			//	else
-					//System.out.println("으아악"+control.event);
+				// else
+				// System.out.println("으아악"+control.event);
 
 			}
 
-			
 			Thread.sleep(100);
 
 		} catch (InterruptedException e) {
@@ -399,23 +450,24 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 		// if(ply.size()!=0)
 
 		System.out.println("여까진옴2");
-		dPlayer = (Player) control.playerData.get
-				(control.getNickName()[control.getTurnCP()]); // 지금 플레이중인
-		System.out.println("턴"+control.getTurnCP()+"/"+control.event+"/가진 주사위값"+dPlayer.userDics);
-		//3 유저.
-	//Syste3m.out.println("애니메이션 입장 :"+dPlayer.name);
+		dPlayer = (Player) control.playerData.get(control.getNickName()[control
+				.getTurnCP()]); // 지금 플레이중인
+		System.out.println("턴" + control.getTurnCP() + "/" + control.event
+				+ "/가진 주사위값" + dPlayer.userDics);
+		// 3 유저.
+		// Syste3m.out.println("애니메이션 입장 :"+dPlayer.name);
 		try {
-//			if (f == true) {
-//				for (int i = 0; i < 10; i++) {
-//
-//					repaint();
-//					dice1 = (int) (Math.random() * 5 + 1);
-//					dice2 = (int) (Math.random() * 5 + 1);
-//					Thread.sleep(100);
-//
-//				}
-//				
-//			}
+			// if (f == true) {
+			// for (int i = 0; i < 10; i++) {
+			//
+			// repaint();
+			// dice1 = (int) (Math.random() * 5 + 1);
+			// dice2 = (int) (Math.random() * 5 + 1);
+			// Thread.sleep(100);
+			//
+			// }
+			//
+			// }
 			userMove();
 		} catch (Exception e) {
 		}
@@ -424,19 +476,19 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 
 	public void userMove() {
 		try {
-			System.out.println("무브"); 
-			System.out.println("턴인놈 이름"+dPlayer.name);
-			System.out.println (control.event+"이벤트"+dPlayer.userDics);
+			System.out.println("무브");
+			System.out.println("턴인놈 이름" + dPlayer.name);
+			System.out.println(control.event + "이벤트" + dPlayer.userDics);
 			Thread.sleep(300);
 			f = false;
 			control.GAME_CONTROL(1);
-			
-			//int diceRst = control.getFirstDics() + control.getSecondDics();
+
+			// int diceRst = control.getFirstDics() + control.getSecondDics();
 			int diceRst = dPlayer.userDics;
-			System.out.println(dPlayer+"유저");
-			System.out.println("턴값"+control.getTurnCP()+"다이스값" + diceRst);
+			System.out.println(dPlayer + "유저");
+			System.out.println("턴값" + control.getTurnCP() + "다이스값" + diceRst);
 			// 움직임
-			for (int i = 0; i < diceRst ; i++) {
+			for (int i = 0; i < diceRst; i++) {
 				dPlayer.thisXY++;
 				if (dPlayer.thisXY >= 32)
 					dPlayer.thisXY = 0;
@@ -469,17 +521,23 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 				if (c != null) {
 					int[] p = c.getPrice();
 					System.out.println(p[0] + "/" + p[1]);
-					inCity.setCityData(c,c.getCityName(), p[0]);
+					inCity.setCityData(c, c.getCityName(), p[0]);
 
 				}
-				System.out.println("지금 도시이름"+c.getCityName());
-				//inCity.setCityData(c,c.getCityName(), 5000);
+				System.out.println("지금 도시이름" + c.getCityName());
+				// inCity.setCityData(c,c.getCityName(), 5000);
 				System.out.println("구매");
-				inCity.updateUI();
-				inCity.setVisible(true);
-				//control.GAME_CONTROL(100);
-				//f=false;
-				//trunOver = false;
+				if (buildokCheck(c.getCityName())) {
+					control.turnOver();
+					control.GAME_CONTROL(100);
+					trunOver = false;
+					f = false;
+				} else {
+					inCity.updateUI();
+					inCity.setVisible(true);
+				}// control.GAME_CONTROL(100);
+					// f=false;
+					// trunOver = false;
 			} else if (control.playerData.get(control.getIAM()).money < 0) {
 				System.exit(0);
 			} else if (c != null
@@ -500,7 +558,7 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 								+ c.getPrice()[i]);
 					}
 					System.out.println(tMoney);
-					
+
 				}
 				System.out.println("걸림3");
 				control.playerData.get(control.getIAM()).money -= tMoney * 2; // 현제유저의
@@ -516,26 +574,45 @@ public class TablePanel extends JPanel implements MouseListener, Runnable {
 				// userNum++;
 				// else
 				// userNum = 0;
+				if (control.playerData.get(control.getIAM()).money > 0) {
+					if (control.playerData.get(control.getIAM()).getUserState() == 1) {
+						Thread.sleep(500);
+						control.playerData.get(control.getIAM())
+								.setUserState(0);
+					}
+				} else {
+					control.playerData.get(control.getIAM()).setUserState(10);
+					// 죽었을때 컨트롤러에서 그놈의 턴이 안오게 추가
+				}
+
 				control.turnOver();
 				control.GAME_CONTROL(100);
 				trunOver = false;
-				f=false;
-				
+				f = false;
 
 			} else {
 				// if (userNum < 1)
 				// userNum++;
 				// else
 				// userNum = 0;
-				f=false;
+				f = false;
 				control.turnOver();
 				control.GAME_CONTROL(100);
 				trunOver = false;
-				
+
 			}
 		} catch (Exception e) {
 		}
 	}
 
-	 
+	// 건설 불가체크 
+	public boolean buildokCheck(String bd) {
+		Boolean b = false;
+		if (bd.equals("찬스카드") || bd.equals("세계여행") || bd.equals("출발지")
+				|| bd.equals("무인도") || bd.equals("마카오"))
+			b = true;
+
+		return b;
+	}
+
 }

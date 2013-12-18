@@ -76,6 +76,7 @@ public class MabulEx extends JFrame implements WindowListener {
 		int result = JOptionPane.showConfirmDialog(null, "게임을 완전히 종료하시겠습니까? 취소하시면 대기실 화면으로 이동합니다.", "게임 종료", JOptionPane.YES_NO_OPTION);
 		if(result == JOptionPane.YES_OPTION) {	
 			waitingRoom.client.send(new ChatData(ChatType.WaitingRoomExit,"대기실 나감"));
+			
 			ChatData cd = new ChatData();
 			cd.setType(ChatType.Exit);
 			waitingRoom.client.send(cd);
@@ -84,7 +85,7 @@ public class MabulEx extends JFrame implements WindowListener {
 			} catch (InterruptedException e1) {			
 				e1.printStackTrace();
 			}
-			System.exit(0);
+			System.exit(0); 
 		}
 		System.out.println("게임창 숨기기");
 		this.setVisible(false);	
